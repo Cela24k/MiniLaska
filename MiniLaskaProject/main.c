@@ -1,93 +1,158 @@
 #include <stdio.h>
-int scacchiera[7][7]; //ci dice le posizioni delle pedine
-int tabella[7][7]; //ci dice quante pedine una sopra l'altra
+#include <stdlib.h>
 
-/*inizializza una scacchiera di pedine int: 1 se giocatore1, 2 se giocatore 2, 0 se vuota */
+enum color{BLUE,RED,NONE};
 
-void inizializza_scacchiera(int mat[7][7])
+typedef struct pedina
 {
-    int i,j;
+    int coordx;
+    int coordy;
+    enum color colore;
+} *Pedina;
 
-    for(i=0;i<7;i++)
-    {
-        for(j=0;j<7;j++)
-        {
-            if((j%2==0 && i%2==0) || (j%2!=0 && i%2!=0) && i!=3)
+typedef struct board{
+    Pedina* vet[7][7];
+} *Board;
+
+Pedina* init_pedina(int x, int y, enum color colore)
+{
+    Pedina *p;
+    p = (Pedina*)malloc(sizeof(Pedina)*3);
+    p[0] = malloc(sizeof(struct pedina));
+    p[1] = malloc(sizeof(struct pedina));
+    p[2] = malloc(sizeof(struct pedina));
+
+    p[0]->colore = colore;
+    p[0]->coordy = y;
+    p[0]->coordx = x;
+
+    p[1]->colore = NONE;
+    p[1]->coordy = y;
+    p[1]->coordx = x;
+
+    p[2]->colore = NONE;
+    p[2]->coordy = y;
+    p[2]->coordx = x;
+
+    return p;
+}
+
+Board init_board()
+{
+    Board b = malloc(sizeof(struct board));
+
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            b->vet[i][j] = init_pedina(i,j,NONE);
+            if((i+j)%2 == 0)
             {
-                if(i<3) mat[i][j] = 1;
-                else mat[i][j] = 2;
+                if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE);
+                if(i == 3) b->vet[i][j] = init_pedina(i,j,NONE);
+                if(i>3) b->vet[i][j] = init_pedina(i,j,RED);
             }
-
-            else mat[i][j] = 0;
         }
     }
+    return b;
 }
 
-void inizializza_tabella(int mat[7][7])
+int contastack(Pedina* pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
 {
-    int i,j;
-
-    for(i=0;i<7;i++)
-    {
-        for(j=0;j<7;j++)
+    int c;
+    c=0;
+    for (int i = 0; i < 3; ++i) {
+        if(pedina[i]->colore != NONE)
         {
-            if((j%2==0 && i%2==0) || (j%2!=0 && i%2!=0) && i!=3) mat[i][j] = 1;
-            else mat[i][j] = 0;
+            c++;
         }
     }
+    return c;
 }
 
-void printa(int mat[7][7])
+void print_board(Board board)
 {
-    int i,j;
-    for(i=0;i<7;i++)
-    {
-        for(j=0;j<7;j++)
-        {
-            printf("%2d",mat[i][j]);
+    if(!board) return;
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            if((*(board->vet[i][j]))->colore == BLUE)
+            {
+                if(contastack((board->vet[i][j]))>1)
+                    printf("B ");
+                else printf("b ");
+            }
+            if((*(board->vet[i][j]))->colore == NONE)
+            {
+                printf("%c ",219);
+            }
+            if((*(board->vet[i][j]))->colore == RED)
+            {
+                if(contastack((board->vet[i][j])))
+                    printf("r ");
+                else printf("R ");
+            }
         }
         printf("\n");
     }
 }
 
-/* ritorna 0 se è riuscito a muovere 1 altrimenti*/
-//da implementare la "mangiata"
+/* muove una pedina, ATTENZIONE, NON controlla se la mossa è valida secondo le regole di gioco,
+ * ma solo se la mossa è limitata al campo.
+ */
 
-int muovi(int player,int x1, int y1, int x2, int y2)
+int muovi(Pedina p,int x, int y,Board b)
 {
-    int flag = 0;
-    if(x2 < 7 && y2 < 7 && (x2+y2) %2 == 0 && scacchiera[x1][y1] == player && scacchiera[x2][y2] == 0)
+    if(!p) return 0;
+    if(x<7 && y<7 && (*(b->vet[x][y]))->colore == NONE)
     {
-        scacchiera[x1][y1] = 0;
-        tabella[x1][y1] = 0;
-        scacchiera[x2][y2] = player;
-        tabella[x2][y2] = 1;
-        flag = 1;
+        Pedina *tmp;
+        tmp = b->vet[p->coordx][p->coordy];
+        b->vet[p->coordx][p->coordy] = b->vet[x][y];
+        b->vet[x][y] = tmp;
+
+        p->coordx = x;
+        p->coordy = y;
+
+        return 1;
     }
-    else return flag;
+    else return 0;
 }
 
+/* muove una pedina secondo le regole di gioco,
+ * se non è possibile con gli argomenti proposti restituisce 0;
+ */
+
+int muovi_legale_wrapper(Pedina p,int x, int y,Board b)
+{
+    if((x == p->coordx + 1 || x == p->coordx - 1) && (y == p->coordy +1 || y == p->coordy -1))
+        return muovi(p,x,y,b);
+    else return 0;
+}
+
+/* TODO: far si che la pedina "salga" sull'altra dopo aver mangiato
+ *
+ */
+
+int mangia_legale(Pedina p, int x, int y, Board b)
+{
+    if((x == p->coordx + 2 || x == p->coordx - 2) && (y == p->coordy + 2 || y == p->coordy - 2))
+    {
+        int xmangiato, ymangiato;
+        xmangiato = (p->coordx + x) / 2;
+        ymangiato = (p->coordy + y) / 2;
+
+        if((*(b->vet[xmangiato][ymangiato]))->colore != NONE && (*(b->vet[xmangiato][ymangiato]))->colore != p->colore)
+        {
+
+            return muovi(p,x,y,b);
+        }
+        else return 0;
+    }
+    return 0;
+}
 
 int main() {
-    int boh = 0;
-
-    inizializza_scacchiera(scacchiera);
-    inizializza_tabella(tabella);
-    printa(scacchiera);
+    Board b = init_board();
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(*(b->vet[2][4]),3,3,b));
     printf("\n");
-    printa(tabella);
-    printf("\n");
-
-    //boh=muovi(1,2,0,3,1);
-    muovi(1,2,0,3,1);
-
-    printf("\n");
-    printa(scacchiera);
-    printf("\n");
-    printa(tabella);
-
-
-
-
-    return 0;
+    print_board(b);
 }
