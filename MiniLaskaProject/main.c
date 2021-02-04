@@ -8,31 +8,21 @@ typedef struct pedina
     int coordx;
     int coordy;
     enum color colore;
+    struct pedina *next;
 } *Pedina;
 
 typedef struct board{
     Pedina* vet[7][7];
 } *Board;
 
-Pedina* init_pedina(int x, int y, enum color colore)
+Pedina init_pedina(int x, int y, enum color colore)
 {
-    Pedina *p;
-    p = (Pedina*)malloc(sizeof(Pedina)*3);
-    p[0] = malloc(sizeof(struct pedina));
-    p[1] = malloc(sizeof(struct pedina));
-    p[2] = malloc(sizeof(struct pedina));
-
-    p[0]->colore = colore;
-    p[0]->coordy = y;
-    p[0]->coordx = x;
-
-    p[1]->colore = NONE;
-    p[1]->coordy = y;
-    p[1]->coordx = x;
-
-    p[2]->colore = NONE;
-    p[2]->coordy = y;
-    p[2]->coordx = x;
+    Pedina p;
+    p = malloc(sizeof(struct pedina));
+    p->coordx = x;
+    p->coordy = y;
+    p->colore = colore;
+    p->next = NULL;
 
     return p;
 }
@@ -41,30 +31,35 @@ Board init_board()
 {
     Board b = malloc(sizeof(struct board));
 
+
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
-            b->vet[i][j] = init_pedina(i,j,NONE);
+            b->vet[i][j] = malloc(sizeof(Pedina*));
+            *b->vet[i][j] = NULL;
             if((i+j)%2 == 0)
             {
-                if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE);
-                if(i == 3) b->vet[i][j] = init_pedina(i,j,NONE);
-                if(i>3) b->vet[i][j] = init_pedina(i,j,RED);
+                if(i<3) *b->vet[i][j] = init_pedina(i,j,BLUE);
+                if(i == 3) *b->vet[i][j] = NULL;
+                if(i>3) *b->vet[i][j] = init_pedina(i,j,RED);
             }
         }
     }
     return b;
 }
 
-int contastack(Pedina* pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
+int contastack(Pedina pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
 {
     int c;
-    c=0;
-    for (int i = 0; i < 3; ++i) {
-        if(pedina[i]->colore != NONE)
-        {
-            c++;
-        }
+    Pedina tmp;
+    c = 0;
+    tmp = pedina;
+
+    while(tmp)
+    {
+        tmp = tmp->next;
+        c++;
     }
+
     return c;
 }
 
@@ -73,21 +68,24 @@ void print_board(Board board)
     if(!board) return;
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
-            if((*(board->vet[i][j]))->colore == BLUE)
+            if(*board->vet[i][j])
             {
-                if(contastack((board->vet[i][j]))>1)
-                    printf("B ");
-                else printf("b ");
+                if((*board->vet[i][j])->colore == BLUE)
+                {
+                    if(contastack((*board->vet[i][j]))>1)
+                        printf("B ");
+                    else printf("b ");
+                }
+                if((*board->vet[i][j])->colore == RED)
+                {
+                    if(contastack(*(board->vet[i][j])))
+                        printf("r ");
+                    else printf("R ");
+                }
             }
-            if((*(board->vet[i][j]))->colore == NONE)
+            else
             {
                 printf("%c ",219);
-            }
-            if((*(board->vet[i][j]))->colore == RED)
-            {
-                if(contastack((board->vet[i][j])))
-                    printf("r ");
-                else printf("R ");
             }
         }
         printf("\n");
@@ -101,12 +99,13 @@ void print_board(Board board)
 int muovi(Pedina p,int x, int y,Board b)
 {
     if(!p) return 0;
-    if(x<7 && y<7 && (*(b->vet[x][y]))->colore == NONE)
+    if(x<7 && y<7 && !*b->vet[x][y])
     {
-        Pedina *tmp;
-        tmp = b->vet[p->coordx][p->coordy];
-        b->vet[p->coordx][p->coordy] = b->vet[x][y];
-        b->vet[x][y] = tmp;
+        Pedina tmp;
+        tmp = *b->vet[p->coordx][p->coordy];
+
+        *b->vet[p->coordx][p->coordy] = *b->vet[x][y];
+        *b->vet[x][y] = tmp;
 
         p->coordx = x;
         p->coordy = y;
