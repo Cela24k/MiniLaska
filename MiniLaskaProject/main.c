@@ -118,9 +118,9 @@ void print_board(Board board)
                 }
                 if(board->vet[i][j]->colore == RED)
                 {
-                    if(contastack(board->vet[i][j]))
-                        printf("r ");
-                    else printf("R ");
+                    if(contastack(board->vet[i][j])>1)
+                        printf("R ");
+                    else printf("r ");
                 }
             }
             else
@@ -185,6 +185,8 @@ int mossa_legale(Pedina_list p,int x, int y,Board b)
         }
     else return 0;
 }
+// TODO vedere se la pedina è un comandante o una pedina normale e se c'è una pedina al centro ecc, fare qui i controlli
+
 int mangia_legale(Pedina_list p,int x, int y,Board b)
 {
     if((x == p->coordx + 2 || x == p->coordx - 2) && (y <= p->coordy +2 || y == p->coordy -2))
