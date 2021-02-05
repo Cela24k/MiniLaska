@@ -88,8 +88,8 @@ void elimina(Pedina_list *p)
 {
     if(*p)
     {
-        Pedina_list tmp;
-        tmp = *p;
+        Pedina_list *tmp;
+        tmp = p;
         *p = (*p)->next;
         free(tmp);
     }
@@ -148,9 +148,12 @@ int muovi(Pedina_list p,int x, int y,Board b)
         b->vet[p->coordx][p->coordy] = b->vet[x][y];
         b->vet[x][y] = tmp;
 
-        p->coordx = x;
-        p->coordy = y;
-
+        while(p)
+        {
+            p->coordx = x;
+            p->coordy = y;
+            p = p->next;
+        }
         return 1;
     }
     else return 0;
@@ -160,33 +163,57 @@ int muovi(Pedina_list p,int x, int y,Board b)
  * muove una Pedina_list secondo le regole di gioco,
  * se non è possibile con gli argomenti proposti restituisce 0;
  */
-
-int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
+int mossa_legale(Pedina_list p,int x, int y,Board b)
 {
-    if((x == p->coordx + 1 || x == p->coordx - 1) && (y == p->coordy +1 || y == p->coordy -1))
+    if((x == p->coordx + 1 || x == p->coordx - 1) && (y <= p->coordy +1 || y == p->coordy -1))
         if(contastack(p)>1)
-            return muovi(p,x,y,b);
+            return 1;
         else
         {
             if(p->colore == BLUE)
             {
                 if((x == p->coordx + 1) && (y == p->coordy - 1) || (x == p->coordx + 1) && (y == p->coordy + 1))
-                    return muovi(p,x,y,b);
+                    return 1;
                 else return 0;
             }
             else
             {
                 if((x == p->coordx - 1) && (y == p->coordy - 1) || (x == p->coordx - 1) && (y == p->coordy + 1))
-                    return muovi(p,x,y,b);
+                    return 1;
                 else return 0;
             }
         }
     else return 0;
 }
+int mangia_legale(Pedina_list p,int x, int y,Board b)
+{
+    if((x == p->coordx + 2 || x == p->coordx - 2) && (y <= p->coordy +2 || y == p->coordy -2))
+        if(contastack(p)>1)
+            return 1;
+        else
+        {
+            if(p->colore == BLUE)
+            {
+                if((x == p->coordx + 2) && (y == p->coordy - 2) || (x == p->coordx + 2) && (y == p->coordy + 2))
+                    return 1;
+                else return 0;
+            }
+            else
+            {
+                if((x == p->coordx - 2) && (y == p->coordy - 2) || (x == p->coordx - 2) && (y == p->coordy + 2))
+                    return 1;
+                else return 0;
+            }
+        }
+    else return 0;
+}
+int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
+{
+    if(mossa_legale(p,x,y,b)||mangia_legale(p,x,y,b))
+        return muovi(p,x,y,b);
+    else return 0;
+}
 
-/*
- * TODO: far si che la pedina "salga" sull'altra dopo aver mangiato
- */
 
 int mangia(Pedina_list p, int x, int y, Board b)
 {
@@ -201,11 +228,9 @@ int mangia(Pedina_list p, int x, int y, Board b)
 
         if(mangiato && mangiato->colore != p->colore)
         {
-            append(&b->vet[x][y],*b->vet[xmangiato][ymangiato]);
+            append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
             elimina(&b->vet[xmangiato][ymangiato]);
-            mangiato->coordy = y;
-            mangiato->coordx = x;
-            return muovi(p,x,y,b);
+            return muovi_legale_wrapper(p,x,y,b);
         }
         else return 0;
     }
@@ -222,4 +247,6 @@ int main() {
     printf("\n%d",mangia(b->vet[4][2],2,4,b));
     printf("\n");
     print_board(b);
+    printf("\n");
+    //printf("%d",contastack())
 }
