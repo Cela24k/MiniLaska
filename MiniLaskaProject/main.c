@@ -9,15 +9,15 @@ typedef struct pedina
     int coordy;
     enum color colore;
     struct pedina *next;
-} *Pedina;
+} *Pedina_list;
 
 typedef struct board{
-    Pedina vet[7][7];
+    Pedina_list vet[7][7];
 } *Board;
 
-Pedina init_pedina(int x, int y, enum color colore)
+Pedina_list init_pedina(int x, int y, enum color colore)
 {
-    Pedina p;
+    Pedina_list p;
     p = malloc(sizeof(struct pedina));
     p->coordx = x;
     p->coordy = y;
@@ -45,10 +45,10 @@ Board init_board()
     return b;
 }
 
-int contastack(Pedina pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
+int contastack(Pedina_list pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
 {
     int c;
-    Pedina tmp;
+    Pedina_list tmp;
     c = 0;
     tmp = pedina;
 
@@ -61,41 +61,38 @@ int contastack(Pedina pedina) // utility, restituisce quante pedine ha un determ
     return c;
 }
 
-void aggiungi_pedina(Pedina p, Pedina testa)
+void append(Pedina_list *p,struct pedina p1)
 {
-    if(p)
+    Pedina_list tmp;
+    tmp = (Pedina_list)malloc(sizeof(struct pedina));
+    tmp->coordx = p1.coordx;
+    tmp->coordy = p1.coordy;
+    tmp->colore = p1.colore;
+    tmp->next = NULL;
+
+    if(*p)
     {
-        if(p->next) aggiungi_pedina(p->next,testa);
-        else
+        while((*p)->next)
         {
-            p->next = testa;
+            *p = (*p)->next;
         }
+        (*p)->next = tmp;
+    }
+    else
+    {
+        *p = tmp;
     }
 }
 
-Pedina head(Pedina p)
+void elimina(Pedina_list *p)
 {
-    if(p)
+    if(*p)
     {
-        if(p->next)
-        {
-            return head(p->next);
-        }
-        else return p;
+        Pedina_list tmp;
+        tmp = *p;
+        *p = (*p)->next;
+        free(tmp);
     }
-    return NULL;
-}
-
-Pedina pop(Pedina p)
-{
-    Pedina tmp;
-    while(p && p->next)
-    {
-        p = p->next;
-    }
-    tmp = p->next;
-    p->next = NULL;
-    return tmp;
 }
 
 void print_row_occ(Board b,int r)
@@ -113,13 +110,13 @@ void print_board(Board board)
         for (int j = 0; j < 7; ++j) {
             if(board->vet[i][j])
             {
-                if(head(board->vet[i][j])->colore == BLUE)
+                if(board->vet[i][j]->colore == BLUE)
                 {
                     if(contastack(board->vet[i][j])>1)
                         printf("B ");
                     else printf("b ");
                 }
-                if((board->vet[i][j])->colore == RED)
+                if(board->vet[i][j]->colore == RED)
                 {
                     if(contastack(board->vet[i][j]))
                         printf("r ");
@@ -139,12 +136,13 @@ void print_board(Board board)
 /* muove una pedina, ATTENZIONE, NON controlla se la mossa è valida secondo le regole di gioco,
  * ma solo se la mossa è limitata al campo.
  */
-int muovi(Pedina p,int x, int y,Board b)
+
+int muovi(Pedina_list p,int x, int y,Board b)
 {
     if(!p) return 0;
     if(x >= 0 && y >= 0 && x<7 && y<7 && !b->vet[x][y])
     {
-        Pedina tmp;
+        Pedina_list tmp;
         tmp = b->vet[p->coordx][p->coordy];
 
         b->vet[p->coordx][p->coordy] = b->vet[x][y];
@@ -159,11 +157,11 @@ int muovi(Pedina p,int x, int y,Board b)
 }
 
 /*
- * muove una pedina secondo le regole di gioco,
+ * muove una Pedina_list secondo le regole di gioco,
  * se non è possibile con gli argomenti proposti restituisce 0;
  */
 
-int muovi_legale_wrapper(Pedina p,int x, int y,Board b)
+int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 {
     if((x == p->coordx + 1 || x == p->coordx - 1) && (y == p->coordy +1 || y == p->coordy -1))
         if(contastack(p)>1)
@@ -190,26 +188,21 @@ int muovi_legale_wrapper(Pedina p,int x, int y,Board b)
  * TODO: far si che la pedina "salga" sull'altra dopo aver mangiato
  */
 
-void hop(Pedina mangiato, Pedina mangiante,Board b)
-{
-    aggiungi_pedina(mangiante,pop(mangiato));
-    b->vet[mangiato->coordx][mangiato->coordy] = NULL;
-}
-
-int mangia(Pedina p, int x, int y, Board b)
+int mangia(Pedina_list p, int x, int y, Board b)
 {
     if((x == p->coordx + 2 || x == p->coordx - 2) && (y == p->coordy + 2 || y == p->coordy - 2))
     {
         int xmangiato, ymangiato;
-        Pedina mangiato;
+        Pedina_list mangiato;
 
         xmangiato = (p->coordx + x) / 2;
         ymangiato = (p->coordy + y) / 2;
         mangiato = b->vet[xmangiato][ymangiato];
 
-        if(mangiato && head(mangiato)->colore != p->colore)
+        if(mangiato && mangiato->colore != p->colore)
         {
-            hop(mangiato,p,b);
+            append(&b->vet[x][y],*b->vet[xmangiato][ymangiato]);
+            elimina(&b->vet[xmangiato][ymangiato]);
             mangiato->coordy = y;
             mangiato->coordx = x;
             return muovi(p,x,y,b);
@@ -222,11 +215,11 @@ int mangia(Pedina p, int x, int y, Board b)
 int main() {
     Board b = init_board();
     print_board(b);
+    printf("\n");
     printf("\n%d",muovi_legale_wrapper(b->vet[2][4],3,3,b));
     printf("\n");
     print_board(b);
     printf("\n%d",mangia(b->vet[4][2],2,4,b));
     printf("\n");
     print_board(b);
-    //printf("%d",contastack(*b->vet[0][0]));/*
 }
