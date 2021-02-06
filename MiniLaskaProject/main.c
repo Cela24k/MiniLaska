@@ -2,12 +2,14 @@
 #include <stdlib.h>
 
 enum color{BLUE,RED};
+enum stato {PEDINA,GENERALE};
 
 typedef struct pedina
 {
     int coordx;
     int coordy;
     enum color colore;
+    enum stato stato;
     struct pedina *next;
 } *Pedina_list;
 
@@ -15,13 +17,14 @@ typedef struct board{
     Pedina_list vet[7][7];
 } *Board;
 
-Pedina_list init_pedina(int x, int y, enum color colore)
+Pedina_list init_pedina(int x, int y, enum color colore,enum stato s)
 {
     Pedina_list p;
     p = malloc(sizeof(struct pedina));
     p->coordx = x;
     p->coordy = y;
     p->colore = colore;
+    p->stato = s;
     p->next = NULL;
 
     return p;
@@ -36,9 +39,9 @@ Board init_board()
             b->vet[i][j] = NULL;
             if((i+j)%2 == 0)
             {
-                if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE);
+                if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE,PEDINA);
                 if(i == 3) b->vet[i][j] = NULL;
-                if(i>3) b->vet[i][j] = init_pedina(i,j,RED);
+                if(i>3) b->vet[i][j] = init_pedina(i,j,RED,PEDINA);
             }
         }
     }
@@ -64,27 +67,30 @@ int contastack(Pedina_list pedina) // utility, restituisce quante pedine ha un d
 void append(Pedina_list *p,struct pedina p1)
 {
     Pedina_list tmp;
+    Pedina_list scorri;
     tmp = (Pedina_list)malloc(sizeof(struct pedina));
     tmp->coordx = p1.coordx;
     tmp->coordy = p1.coordy;
     tmp->colore = p1.colore;
+    tmp->stato = p1.stato;
     tmp->next = NULL;
+    scorri = *p;
 
-    if(*p)
+    if(scorri)
     {
-        while((*p)->next)
+        while(scorri->next)
         {
-            *p = (*p)->next;
+            scorri = (scorri)->next;
         }
-        (*p)->next = tmp;
+        scorri->next = tmp;
     }
     else
     {
-        *p = tmp;
+        scorri = tmp;
     }
 }
 
-void elimina(Pedina_list *p)
+void elimina_testa(Pedina_list *p)
 {
     if(*p)
     {
@@ -150,6 +156,8 @@ int muovi(Pedina_list p,int x, int y,Board b)
 
         while(p)
         {
+            if(x == 0 || x==6)
+                p->stato = GENERALE;
             p->coordx = x;
             p->coordy = y;
             p = p->next;
@@ -166,7 +174,7 @@ int muovi(Pedina_list p,int x, int y,Board b)
 int mossa_legale(Pedina_list p,int x, int y,Board b)
 {
     if((x == p->coordx + 1 || x == p->coordx - 1) && (y <= p->coordy +1 || y == p->coordy -1))
-        if(contastack(p)>1)
+        if(p->stato==GENERALE)
             return 1;
         else
         {
@@ -185,12 +193,11 @@ int mossa_legale(Pedina_list p,int x, int y,Board b)
         }
     else return 0;
 }
-// TODO vedere se la pedina è un comandante o una pedina normale e se c'è una pedina al centro ecc, fare qui i controlli
 
 int mangia_legale(Pedina_list p,int x, int y,Board b)
 {
     if((x == p->coordx + 2 || x == p->coordx - 2) && (y <= p->coordy +2 || y == p->coordy -2))
-        if(contastack(p)>1)
+        if(p->stato == GENERALE)
             return 1;
         else
         {
@@ -209,6 +216,7 @@ int mangia_legale(Pedina_list p,int x, int y,Board b)
         }
     else return 0;
 }
+
 int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 {
     if(mossa_legale(p,x,y,b)||mangia_legale(p,x,y,b))
@@ -216,9 +224,26 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
     else return 0;
 }
 
+void elimina_coda(Pedina_list *p)
+{
+    Pedina_list tmp;
+    Pedina_list tmp2;
+    tmp = *p;
+    if(tmp)
+    {
+        while(tmp->next)
+        {
+            tmp2 = tmp;
+            tmp = tmp->next;
+        }
+        tmp2->next = NULL;
+        free(tmp);
+    }
+}
 
 int mangia(Pedina_list p, int x, int y, Board b)
 {
+    if(!p) return 0;
     if((x == p->coordx + 2 || x == p->coordx - 2) && (y == p->coordy + 2 || y == p->coordy - 2))
     {
         int xmangiato, ymangiato;
@@ -230,9 +255,15 @@ int mangia(Pedina_list p, int x, int y, Board b)
 
         if(mangiato && mangiato->colore != p->colore)
         {
-            append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
-            elimina(&b->vet[xmangiato][ymangiato]);
-            return muovi_legale_wrapper(p,x,y,b);
+            if(mangia_legale(p,x,y,b))
+            {
+                append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
+                elimina_testa(&b->vet[xmangiato][ymangiato]);
+                if(contastack(b->vet[p->coordx][p->coordy])>3)
+                    elimina_coda(&b->vet[p->coordx][p->coordy]);
+                return muovi_legale_wrapper(p,x,y,b);
+            }
+            else return 0;
         }
         else return 0;
     }
@@ -242,7 +273,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
 int main() {
     Board b = init_board();
     print_board(b);
-    printf("\n");
+    printf("\n primo");
     printf("\n%d",muovi_legale_wrapper(b->vet[2][4],3,3,b));
     printf("\n");
     print_board(b);
@@ -250,5 +281,26 @@ int main() {
     printf("\n");
     print_board(b);
     printf("\n");
+    printf("\n%d",mangia(b->vet[1][5],3,3,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(b->vet[5][1],4,2,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",mangia(b->vet[3][3],5,1,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(b->vet[5][3],4,2,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",mangia(b->vet[5][1],3,3,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(b->vet[6][2],5,3,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(b->vet[5][1],6,2,b));
+    printf("\n");
+    print_board(b);
     //printf("%d",contastack())
 }
