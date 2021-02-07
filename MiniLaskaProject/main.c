@@ -101,6 +101,23 @@ void elimina_testa(Pedina_list *p)
     }
 }
 
+void elimina_coda(Pedina_list *p)
+{
+    Pedina_list tmp;
+    Pedina_list tmp2;
+    tmp = *p;
+    if(tmp)
+    {
+        while(tmp->next)
+        {
+            tmp2 = tmp;
+            tmp = tmp->next;
+        }
+        tmp2->next = NULL;
+        free(tmp);
+    }
+}
+
 void print_row_occ(Board b,int r)
 {
     printf("    ");
@@ -171,22 +188,23 @@ int muovi(Pedina_list p,int x, int y,Board b)
  * muove una Pedina_list secondo le regole di gioco,
  * se non è possibile con gli argomenti proposti restituisce 0;
  */
-int mossa_legale(Pedina_list p,int x, int y,Board b)
+int legale(Pedina_list p,int x, int y,Board b,int k)
 {
-    if((x == p->coordx + 1 || x == p->coordx - 1) && (y <= p->coordy +1 || y == p->coordy -1))
+    if(b->vet[x][y] != NULL) return 0;
+    if((x == p->coordx + k || x == p->coordx - k) && (y <= p->coordy +k || y == p->coordy -k))
         if(p->stato==GENERALE)
             return 1;
         else
         {
             if(p->colore == BLUE)
             {
-                if((x == p->coordx + 1) && (y == p->coordy - 1) || (x == p->coordx + 1) && (y == p->coordy + 1))
+                if((x == p->coordx + k) && (y == p->coordy - k) || (x == p->coordx + k) && (y == p->coordy + k))
                     return 1;
                 else return 0;
             }
             else
             {
-                if((x == p->coordx - 1) && (y == p->coordy - 1) || (x == p->coordx - 1) && (y == p->coordy + 1))
+                if((x == p->coordx - k) && (y == p->coordy - k) || (x == p->coordx - k) && (y == p->coordy + k))
                     return 1;
                 else return 0;
             }
@@ -194,27 +212,17 @@ int mossa_legale(Pedina_list p,int x, int y,Board b)
     else return 0;
 }
 
+int mossa_legale(Pedina_list p,int x, int y,Board b)
+{
+    return legale(p,x,y,b,1);
+}
+
 int mangia_legale(Pedina_list p,int x, int y,Board b)
 {
-    if((x == p->coordx + 2 || x == p->coordx - 2) && (y <= p->coordy +2 || y == p->coordy -2))
-        if(p->stato == GENERALE)
-            return 1;
-        else
-        {
-            if(p->colore == BLUE)
-            {
-                if((x == p->coordx + 2) && (y == p->coordy - 2) || (x == p->coordx + 2) && (y == p->coordy + 2))
-                    return 1;
-                else return 0;
-            }
-            else
-            {
-                if((x == p->coordx - 2) && (y == p->coordy - 2) || (x == p->coordx - 2) && (y == p->coordy + 2))
-                    return 1;
-                else return 0;
-            }
-        }
-    else return 0;
+    int mangiatox = (p->coordx+x)/2;
+    int mangiatoy = (p->coordy+y)/2;
+
+    return (legale(p,x,y,b,2)&&b->vet[mangiatox][mangiatoy]&&(b->vet[mangiatox][mangiatoy]->colore != p->colore));
 }
 
 int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
@@ -224,27 +232,9 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
     else return 0;
 }
 
-void elimina_coda(Pedina_list *p)
-{
-    Pedina_list tmp;
-    Pedina_list tmp2;
-    tmp = *p;
-    if(tmp)
-    {
-        while(tmp->next)
-        {
-            tmp2 = tmp;
-            tmp = tmp->next;
-        }
-        tmp2->next = NULL;
-        free(tmp);
-    }
-}
-
 int mangia(Pedina_list p, int x, int y, Board b)
 {
-    if(!p) return 0;
-    if((x == p->coordx + 2 || x == p->coordx - 2) && (y == p->coordy + 2 || y == p->coordy - 2))
+    if(mangia_legale(p,x,y,b))
     {
         int xmangiato, ymangiato;
         Pedina_list mangiato;
@@ -252,27 +242,75 @@ int mangia(Pedina_list p, int x, int y, Board b)
         xmangiato = (p->coordx + x) / 2;
         ymangiato = (p->coordy + y) / 2;
         mangiato = b->vet[xmangiato][ymangiato];
-
-        if(mangiato && mangiato->colore != p->colore)
-        {
-            if(mangia_legale(p,x,y,b))
-            {
-                append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
-                elimina_testa(&b->vet[xmangiato][ymangiato]);
-                if(contastack(b->vet[p->coordx][p->coordy])>3)
-                    elimina_coda(&b->vet[p->coordx][p->coordy]);
-                return muovi_legale_wrapper(p,x,y,b);
-            }
-            else return 0;
-        }
-        else return 0;
+        append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
+        elimina_testa(&b->vet[xmangiato][ymangiato]);
+        if(contastack(b->vet[p->coordx][p->coordy])>3)
+            elimina_coda(&b->vet[p->coordx][p->coordy]);
+        muovi(p,x,y,b);
+        return 1;
     }
     return 0;
 }
 
+int has_all_pieces(enum color player, Board b)
+{
+    int flg = 1;
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            if(b->vet[i][j] && b->vet[i][j]->colore != player)
+                flg = 0;
+        }
+    }
+    return flg;
+}
+/*
+int has_moves(Pedina_list p,Board b,int *coords)
+{
+    int flag;
+    flag = 0;
+
+    if(p)
+    {
+        for (int i = 1; i < 3; ++i) {
+            if(p->coordx+1 >= 0 && p->coordx+1 <=6 )
+            if(mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b))
+            {
+                flag = 1;
+                coords[i] = p->coordx+i;
+                coords[i+1] = p->coordy+j;
+            }
+        }
+    }
+    return flag;
+
+}
+
+int no_moves(enum color player, Board b)
+{
+    int flag = 1;
+    int moves[8] = {0,0,0,0,0,0,0,0};
+
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            if(b->vet[i][j] && b->vet[i][j]->colore == player && !has_moves(b->vet[i][j],b,moves))
+                flag = 0;
+        }
+    }
+    return flag;
+}
+
+int partita1(Board b, enum color player1, enum color player2)
+{
+    if(!winner(b))
+}
+*/
+
 int main() {
     Board b = init_board();
     print_board(b);
+
+    int coords[8];
+
     printf("\n primo");
     printf("\n%d",muovi_legale_wrapper(b->vet[2][4],3,3,b));
     printf("\n");
@@ -302,5 +340,6 @@ int main() {
     printf("\n%d",muovi_legale_wrapper(b->vet[5][1],6,2,b));
     printf("\n");
     print_board(b);
-    //printf("%d",contastack())
+
+    //printf("%d",has_moves(b->vet[2][2],b,coords));
 }
