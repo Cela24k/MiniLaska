@@ -129,8 +129,11 @@ void print_row_occ(Board b,int r)
 void print_board(Board board)
 {
     if(!board) return;
+    printf("  0 1 2 3 4 5 6 \n");
     for (int i = 0; i < 7; ++i) {
+        printf("%d ",i);
         for (int j = 0; j < 7; ++j) {
+
             if(board->vet[i][j])
             {
                 if(board->vet[i][j]->colore == BLUE)
@@ -226,13 +229,6 @@ int mangia_legale(Pedina_list p,int x, int y,Board b)
     return (legale(p,x,y,b,2)&&b->vet[mangiatox][mangiatoy]&&(b->vet[mangiatox][mangiatoy]->colore != p->colore));
 }
 
-int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
-{
-    if(mossa_legale(p,x,y,b)||mangia_legale(p,x,y,b))
-        return muovi(p,x,y,b);
-    else return 0;
-}
-
 int mangia(Pedina_list p, int x, int y, Board b)
 {
     if(mangia_legale(p,x,y,b))
@@ -242,7 +238,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
 
         xmangiato = (p->coordx + x) / 2;
         ymangiato = (p->coordy + y) / 2;
-        mangiato = b->vet[xmangiato][ymangiato];
+
         append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
         elimina_testa(&b->vet[xmangiato][ymangiato]);
         if(contastack(b->vet[p->coordx][p->coordy])>3)
@@ -251,6 +247,14 @@ int mangia(Pedina_list p, int x, int y, Board b)
         return 1;
     }
     return 0;
+}
+int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
+{
+    if(mossa_legale(p,x,y,b))
+        return muovi(p,x,y,b);
+    else if(mangia_legale(p,x,y,b))
+        return mangia(p,x,y,b);
+    else return 0;
 }
 
 int has_all_pieces(enum color player, Board b)
@@ -340,12 +344,44 @@ enum color winner(Board board,enum color player1,enum color player2)
         return player2;
     return -1;
 }
-
-int partita1(Board b, enum color player1, enum color player2)
+int entro_limiti(int x, int y)
+{
+    return  !(x <0 || x>6 || y<0 || y>6);
+}
+int partita1v1(Board b, enum color player1, enum color player2)
 {
     if(winner(b,player1,player2)==-1)
     {
-        return partita1(b,player1,player2);
+        int x1,y1,x2,y2;
+
+        printf("\n\n");
+        print_board(b);
+
+        if(player1==BLUE)
+            printf("\nGiocatore BLU inizia: \n");
+        else printf("\nGiocatore ROSSO inizia: \n");
+
+        printf("Inserisci le coordinate della pedina da muovere!\n x: ");
+        scanf("%d",&x1);
+        printf("y: ");
+        scanf("%d",&y1);
+        printf("\nOra inserisci le coordinate in cui muoverti.\n x2: ");
+        scanf("%d",&x2);
+        printf("y2: ");
+        scanf("%d",&y2);
+
+
+        if(entro_limiti(x1,y1) && entro_limiti(x2,y2) && muovi_legale_wrapper(b->vet[x1][y1],x2,y2,b) && b->vet[x1][y1]->colore == player1)
+        {
+            printf("\nMosso da x,y (%d,%d)",x1,y1);
+            printf("\nA x2,y2 (%d,%d)",x2,y2);
+            return partita1v1(b,player2,player1);
+        }
+        else
+        {
+            printf("\nMossa illegale, rifai!");
+            return partita1v1(b,player1,player2);
+        }
     }
     return 0;
 }
@@ -353,50 +389,8 @@ int partita1(Board b, enum color player1, enum color player2)
 
 int main() {
     Board b = init_board();
-    print_board(b);
 
     int coords[8] = {0,0,0,0,0,0,0,0};
+    partita1v1(b,BLUE,RED);
 
-    /*
-    printf("\n primo");
-    printf("\n%d",muovi_legale_wrapper(b->vet[2][4],3,3,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",mangia(b->vet[4][2],2,4,b));
-    printf("\n");
-    print_board(b);
-    printf("\n");
-    printf("\n%d",mangia(b->vet[1][5],3,3,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",muovi_legale_wrapper(b->vet[5][1],4,2,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",mangia(b->vet[3][3],5,1,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",muovi_legale_wrapper(b->vet[5][3],4,2,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",mangia(b->vet[5][1],3,3,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",muovi_legale_wrapper(b->vet[6][2],5,3,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",muovi_legale_wrapper(b->vet[5][1],6,2,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",mangia(b->vet[2][0],4,2,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",muovi_legale_wrapper(b->vet[6][2],5,1,b));
-    printf("\n");
-    print_board(b);
-    printf("\n%d",mangia(b->vet[5][1],3,3,b));
-    printf("\n");
-    print_board(b);
-
-    printf("%d",has_moves(b->vet[5][1],b,coords));
-    */
 }
