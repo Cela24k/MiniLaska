@@ -350,7 +350,7 @@ int entro_limiti(int x, int y)
 }
 int partita1v1(Board b, enum color player1, enum color player2)
 {
-    if(winner(b,player1,player2)==-1)
+    if(winner(b,player1,player2)!=player2)
     {
         int x1,y1,x2,y2;
 
@@ -371,7 +371,7 @@ int partita1v1(Board b, enum color player1, enum color player2)
         scanf("%d",&y2);
 
 
-        if(entro_limiti(x1,y1) && entro_limiti(x2,y2) && muovi_legale_wrapper(b->vet[x1][y1],x2,y2,b) && b->vet[x1][y1]->colore == player1)
+        if(entro_limiti(x1,y1) && entro_limiti(x2,y2) && b->vet[x1][y1] && b->vet[x1][y1]->colore == player1 && muovi_legale_wrapper(b->vet[x1][y1],x2,y2,b))
         {
             printf("\nMosso da x,y (%d,%d)",x1,y1);
             printf("\nA x2,y2 (%d,%d)",x2,y2);
@@ -383,14 +383,18 @@ int partita1v1(Board b, enum color player1, enum color player2)
             return partita1v1(b,player1,player2);
         }
     }
-    return 0;
+    return winner(b,player1,player2);
 }
-
+void congratulations(Board b)
+{
+    if(winner(b,BLUE,RED) == BLUE)
+        printf("\n\nCongratulazioni giocatore BLUE! Hai vinto\n");
+    else if(winner(b,BLUE,RED) == RED)
+        printf("\nCongratulazioni giocatore RED! Hai vinto");
+}
 
 int main() {
     Board b = init_board();
-
-    int coords[8] = {0,0,0,0,0,0,0,0};
-    partita1v1(b,BLUE,RED);
-
+    partita1v1(b,RED,BLUE);
+    congratulations(b);
 }
