@@ -29,7 +29,14 @@ Pedina_list init_pedina(int x, int y, enum color colore,enum stato s)
 
     return p;
 }
-
+void delete_pedina(Pedina_list *p)
+{
+    if(*p)
+    {
+        if((*p)->next) delete_pedina(&(*p)->next);
+        free(*p);
+    }
+}
 Board init_board()
 {
     Board b = malloc(sizeof(struct board));
@@ -46,6 +53,16 @@ Board init_board()
         }
     }
     return b;
+}
+
+void delete_board(Board b)
+{
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            delete_pedina(&b->vet[i][j]);
+        }
+    }
+    free(b);
 }
 
 int contastack(Pedina_list pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
@@ -138,13 +155,13 @@ void print_board(Board board)
             {
                 if(board->vet[i][j]->colore == BLUE)
                 {
-                    if(contastack(board->vet[i][j])>1)
+                    if(board->vet[i][j]->stato==GENERALE)
                         printf("B ");
                     else printf("b ");
                 }
                 if(board->vet[i][j]->colore == RED)
                 {
-                    if(contastack(board->vet[i][j])>1)
+                    if(board->vet[i][j]->stato==GENERALE)
                         printf("R ");
                     else printf("r ");
                 }
@@ -248,6 +265,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
     }
     return 0;
 }
+
 int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 {
     if(mossa_legale(p,x,y,b))
@@ -344,10 +362,12 @@ enum color winner(Board board,enum color player1,enum color player2)
         return player2;
     return -1;
 }
+
 int entro_limiti(int x, int y)
 {
     return  !(x <0 || x>6 || y<0 || y>6);
 }
+
 int partita1v1(Board b, enum color player1, enum color player2)
 {
     if(winner(b,player1,player2)!=player2)
@@ -370,7 +390,6 @@ int partita1v1(Board b, enum color player1, enum color player2)
         printf("y2: ");
         scanf("%d",&y2);
 
-
         if(entro_limiti(x1,y1) && entro_limiti(x2,y2) && b->vet[x1][y1] && b->vet[x1][y1]->colore == player1 && muovi_legale_wrapper(b->vet[x1][y1],x2,y2,b))
         {
             printf("\nMosso da x,y (%d,%d)",x1,y1);
@@ -385,6 +404,7 @@ int partita1v1(Board b, enum color player1, enum color player2)
     }
     return winner(b,player1,player2);
 }
+
 void congratulations(Board b)
 {
     if(winner(b,BLUE,RED) == BLUE)
@@ -395,6 +415,12 @@ void congratulations(Board b)
 
 int main() {
     Board b = init_board();
-    partita1v1(b,RED,BLUE);
+    //partita1v1(b,RED,BLUE);
+    muovi_legale_wrapper(b->vet[2][2],3,3,b);
+    print_board(b);
+    mangia(b->vet[4][4],2,2,b);
+    print_board(b);
     congratulations(b);
+    delete_board(b);
+
 }
