@@ -219,6 +219,7 @@ int mossa_legale(Pedina_list p,int x, int y,Board b)
 
 int mangia_legale(Pedina_list p,int x, int y,Board b)
 {
+    if(!p) return 0;
     int mangiatox = (p->coordx+x)/2;
     int mangiatoy = (p->coordy+y)/2;
 
@@ -263,54 +264,100 @@ int has_all_pieces(enum color player, Board b)
     }
     return flg;
 }
-/*
+
+// restituisce true o false (o -1 se non esiste la pedina)
+// e UN ARRAY formato da coordinate di tipo: a[0] = x1 , a[1] = y1 , a[n] = xn, a[n+1] = yn;
+
 int has_moves(Pedina_list p,Board b,int *coords)
 {
+    int c;
     int flag;
     flag = 0;
+    c = 0;
 
     if(p)
     {
         for (int i = 1; i < 3; ++i) {
-            if(p->coordx+1 >= 0 && p->coordx+1 <=6 )
-            if(mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b))
+            if((p->coordx+i >= 0 && p->coordx+i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)
+                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b))
             {
                 flag = 1;
-                coords[i] = p->coordx+i;
-                coords[i+1] = p->coordy+j;
+                coords[c] = p->coordx+i;
+                coords[c+1] = p->coordy+i;
+                c+=2;
+            }
+            if((p->coordx-i >= 0 && p->coordx-i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)
+                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b))
+            {
+                flag = 1;
+                coords[c] = p->coordx-i;
+                coords[c+1] = p->coordy-i;
+                c+=2;
+            }
+            if((p->coordx+i >= 0 && p->coordx-i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b)
+                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b) )
+            {
+                flag = 1;
+                coords[c] = p->coordx+i;
+                coords[c+1] = p->coordy-i;
+                c+=2;
+            }
+            if((p->coordx-i >= 0 && p->coordx+i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b)
+                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b))
+            {
+                flag = 1;
+                coords[c] = p->coordx-i;
+                coords[c+1] = p->coordy+i;
+                c+=2;
             }
         }
+        return flag;
     }
-    return flag;
-
+    else return -1;
 }
 
-int no_moves(enum color player, Board b)
+int player_has_moves(enum color player, Board b)
 {
-    int flag = 1;
+    int flag = 0;
     int moves[8] = {0,0,0,0,0,0,0,0};
 
     for (int i = 0; i < 7; ++i) {
         for (int j = 0; j < 7; ++j) {
-            if(b->vet[i][j] && b->vet[i][j]->colore == player && !has_moves(b->vet[i][j],b,moves))
-                flag = 0;
+            if(b->vet[i][j] && b->vet[i][j]->colore == player && has_moves(b->vet[i][j],b,moves))
+                flag = 1;
         }
     }
     return flag;
 }
 
+//ritorna il colore del vincitore, -1 se non esiste
+
+enum color winner(Board board,enum color player1,enum color player2)
+{
+    if(!player_has_moves(player2,board) || has_all_pieces(player1,board))
+        return player1;
+    if(!player_has_moves(player1,board) || has_all_pieces(player2,board))
+        return player2;
+    return -1;
+}
+
 int partita1(Board b, enum color player1, enum color player2)
 {
-    if(!winner(b))
+    if(winner(b,player1,player2)==-1)
+    {
+        return partita1(b,player1,player2);
+    }
+    return 0;
 }
-*/
+
 
 int main() {
     Board b = init_board();
     print_board(b);
 
-    int coords[8];
+    int coords[8] = {0,0,0,0,0,0,0,0};
 
+    /*
     printf("\n primo");
     printf("\n%d",muovi_legale_wrapper(b->vet[2][4],3,3,b));
     printf("\n");
@@ -340,6 +387,16 @@ int main() {
     printf("\n%d",muovi_legale_wrapper(b->vet[5][1],6,2,b));
     printf("\n");
     print_board(b);
+    printf("\n%d",mangia(b->vet[2][0],4,2,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",muovi_legale_wrapper(b->vet[6][2],5,1,b));
+    printf("\n");
+    print_board(b);
+    printf("\n%d",mangia(b->vet[5][1],3,3,b));
+    printf("\n");
+    print_board(b);
 
-    //printf("%d",has_moves(b->vet[2][2],b,coords));
+    printf("%d",has_moves(b->vet[5][1],b,coords));
+    */
 }
