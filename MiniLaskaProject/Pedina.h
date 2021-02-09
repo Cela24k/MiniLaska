@@ -4,19 +4,19 @@
 
 #ifndef UNTITLED1_PEDINA_H
 #define UNTITLED1_PEDINA_H
-enum color{BLUE,RED};
 enum stato {PEDINA,GENERALE};
+enum giocatore{BLUE,RED};
 
 typedef struct pedina
 {
     int coordx;
     int coordy;
-    enum color colore;
+    enum giocatore colore;
     enum stato stato;
     struct pedina *next;
 } *Pedina_list;
 
-Pedina_list init_pedina(int x, int y, enum color colore,enum stato s)
+Pedina_list init_pedina(int x, int y, enum giocatore colore,enum stato s)
 {
     Pedina_list p;
     p = malloc(sizeof(struct pedina));
@@ -104,7 +104,7 @@ void append(Pedina_list *p,struct pedina p1)
     }
     else
     {
-        scorri = tmp;
+        *p = tmp;
     }
 }
 

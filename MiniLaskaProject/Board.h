@@ -4,7 +4,8 @@
 
 #ifndef UNTITLED1_BOARD_H
 #define UNTITLED1_BOARD_H
-typedef struct board{
+
+typedef struct board {
     Pedina_list vet[7][7];
 } *Board;
 
@@ -25,6 +26,17 @@ Board init_board()
     }
     return b;
 }
+Board init_empty_board()
+{
+    Board b = malloc(sizeof(struct board));
+
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            b->vet[i][j] = NULL;
+        }
+    }
+    return b;
+}
 
 void delete_board(Board b)
 {
@@ -34,6 +46,31 @@ void delete_board(Board b)
         }
     }
     free(b);
+}
+
+Board clone_board(Board b)
+{
+    Board tmp;
+    tmp = init_empty_board();
+
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            if(b->vet[i][j])
+            {
+                Pedina_list p;
+                p = b->vet[i][j];
+
+                while(p)
+                {
+                    append(&tmp->vet[i][j],*p);
+                    p = p->next;
+                }
+            }
+        }
+    }
+    if(tmp)
+        return tmp;
+    else return NULL;
 }
 
 void print_row_occ(Board b,int r)
@@ -178,7 +215,7 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
     else return 0;
 }
 
-int has_all_pieces(enum color player, Board b)
+int has_all_pieces(enum giocatore player, Board b)
 {
     int flg = 1;
     for (int i = 0; i < 7; ++i) {
@@ -241,7 +278,7 @@ int has_moves(Pedina_list p,Board b,int *coords)
     else return -1;
 }
 
-int player_has_moves(enum color player, Board b)
+int player_has_moves(enum giocatore player, Board b)
 {
     int flag = 0;
     int moves[8] = {0,0,0,0,0,0,0,0};
@@ -257,7 +294,7 @@ int player_has_moves(enum color player, Board b)
 
 //ritorna il colore del vincitore, -1 se non esiste
 
-enum color winner(Board board,enum color player1,enum color player2)
+enum giocatore winner(Board board,enum giocatore player1,enum giocatore player2)
 {
     if(!player_has_moves(player2,board) || has_all_pieces(player1,board))
         return player1;
