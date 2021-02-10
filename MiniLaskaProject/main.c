@@ -63,7 +63,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
     altro = (player == BLUE) ? RED : BLUE;
     maxpunti = -100;
 
-    if(rec < 10 && winner(b,BLUE,RED) != player) {
+    if(rec < 33 && winner(b,BLUE,RED) == -1) {
         for (int i = 0; i < 7; ++i) {
             for (int j = 0; j < 7; ++j) {
                 if (b->vet[i][j] && b->vet[i][j]->colore == player) {
@@ -73,19 +73,25 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                         int xtmp,ytmp;
                         highest = -100;
 
-                        for (int k = 0; k < 8; k += 2) {
+                        for (int k = 0; k < 8 && vett[k] != 0; k += 2) {
                             Board tmp;
                             tmp = clone_board(b);
 
-                            if(mangia_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
+                            if(tmp && mangia_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
                             {
-                                mangia(tmp->vet[i][j],k,k+1,tmp);
+                                mangia(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = (altro == color_start) ?
                                     1 + punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out)
-                                    :  -1 + punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
+                                    :  - 1 + punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
 
-                                if(i==6 || i==2) chiamata_ricorsiva+=2;
-
+                                if(i==6 || i==2)
+                                {
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-1 : chiamata_ricorsiva+1;
+                                }
+                                if(winner(tmp,player,altro) != -1)
+                                {
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-3 : chiamata_ricorsiva+3;
+                                }
                                 if(chiamata_ricorsiva > highest){
 
                                     xtmp = vett[k];
@@ -93,16 +99,19 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                     highest = chiamata_ricorsiva;
                                 }
                             }
-                            else if(mossa_legale(tmp->vet[i][j],k,k+1,tmp))
+                            else if(tmp && mossa_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
                             {
-                                muovi(tmp->vet[i][j],k,k+1,tmp);
+                                muovi_legale_wrapper(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
 
                                 if(i==6 || i==2) chiamata_ricorsiva+=2;
 
                                 if(chiamata_ricorsiva > highest){
-                                    xtmp = vett[k];
-                                    ytmp = vett[k+1];
+                                    if(player == color_start)
+                                    {
+                                        xtmp = vett[k];
+                                        ytmp = vett[k+1];
+                                    }
                                     highest = chiamata_ricorsiva;
                                 }
                             }
@@ -110,10 +119,13 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                         if(highest > maxpunti)
                         {
                             maxpunti = highest;
-                            *x1out = i;
-                            *y1out = j;
-                            *x2out = xtmp;
-                            *y2out = ytmp;
+                            if(rec==0)
+                            {
+                                *x1out = i;
+                                *y1out = j;
+                                *x2out = xtmp;
+                                *y2out = ytmp;
+                            }
                         }
                     }
                 }
@@ -216,12 +228,12 @@ int main() {
 
     //main_menu(1);
 
-    Board b = init_board();
     muovi_legale_wrapper(b->vet[2][2],3,3,b);
     muovi_legale_wrapper(b->vet[4][4],2,2,b);
     muovi_legale_wrapper(b->vet[1][3],3,1,b);
+    print_board(b);
     ai_move(b,RED);
-    */
+     */
     partita1vCPU(b,BLUE,RED);
 
 }

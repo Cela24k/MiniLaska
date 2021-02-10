@@ -13,29 +13,38 @@ Board init_board()
 {
     Board b = malloc(sizeof(struct board));
 
-    for (int i = 0; i < 7; ++i) {
-        for (int j = 0; j < 7; ++j) {
-            b->vet[i][j] = NULL;
-            if((i+j)%2 == 0)
-            {
-                if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE,PEDINA);
-                if(i == 3) b->vet[i][j] = NULL;
-                if(i>3) b->vet[i][j] = init_pedina(i,j,RED,PEDINA);
+    if(b)
+    {
+        for (int i = 0; i < 7; ++i) {
+            for (int j = 0; j < 7; ++j) {
+                b->vet[i][j] = NULL;
+                if((i+j)%2 == 0)
+                {
+                    if(i<3) b->vet[i][j] = init_pedina(i,j,BLUE,PEDINA);
+                    if(i == 3) b->vet[i][j] = NULL;
+                    if(i>3) b->vet[i][j] = init_pedina(i,j,RED,PEDINA);
+                }
             }
         }
+        return b;
     }
-    return b;
+    return NULL;
 }
+
 Board init_empty_board()
 {
     Board b = malloc(sizeof(struct board));
 
-    for (int i = 0; i < 7; ++i) {
-        for (int j = 0; j < 7; ++j) {
-            b->vet[i][j] = NULL;
+    if(b)
+    {
+        for (int i = 0; i < 7; ++i) {
+            for (int j = 0; j < 7; ++j) {
+                b->vet[i][j] = NULL;
+            }
         }
+        return b;
     }
-    return b;
+    return NULL;
 }
 
 void delete_board(Board b)
@@ -62,8 +71,8 @@ Board clone_board(Board b)
 
                 while(p)
                 {
-                    append(&tmp->vet[i][j],*p);
-                    p = p->next;
+                    if(append(&tmp->vet[i][j],*p))
+                        p = p->next;
                 }
             }
         }
@@ -150,7 +159,7 @@ int muovi(Pedina_list p,int x, int y,Board b)
 
 int legale(Pedina_list p,int x, int y,Board b,int k)
 {
-    if(b->vet[x][y] != NULL) return 0;
+    if(!p || b->vet[x][y] != NULL) return 0;
     if((x == p->coordx + k || x == p->coordx - k) && (y <= p->coordy +k || y == p->coordy -k))
         if(p->stato==GENERALE)
             return 1;
@@ -227,6 +236,11 @@ int has_all_pieces(enum giocatore player, Board b)
     return flg;
 }
 
+int entro_limiti(int x, int y)
+{
+    return !(x<0 || x>6 || y<0 || y>6);
+}
+
 // restituisce true o false (o -1 se non esiste la pedina)
 // e UN ARRAY formato da coordinate di tipo: a[0] = x1 , a[1] = y1 , a[n] = xn, a[n+1] = yn;
 
@@ -240,15 +254,15 @@ int has_moves(Pedina_list p,Board b,int *coords)
     if(p)
     {
         for (int i = 1; i < 3; ++i) {
-            if((p->coordx+i >= 0 && p->coordx+i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)
-               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b))
+            if(entro_limiti(p->coordx+i,p->coordy+i) && (mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)
+               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)))
             {
                 flag = 1;
                 coords[c] = p->coordx+i;
                 coords[c+1] = p->coordy+i;
                 c+=2;
             }
-            if((p->coordx-i >= 0 && p->coordx-i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)
+            if(entro_limiti(p->coordx-i,p->coordy-i) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)
                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b))
             {
                 flag = 1;
@@ -256,16 +270,16 @@ int has_moves(Pedina_list p,Board b,int *coords)
                 coords[c+1] = p->coordy-i;
                 c+=2;
             }
-            if((p->coordx+i >= 0 && p->coordx-i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b)
-               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b) )
+            if(entro_limiti(p->coordx+i,p->coordy-i) && (mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b)
+               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy-i,b)))
             {
                 flag = 1;
                 coords[c] = p->coordx+i;
                 coords[c+1] = p->coordy-i;
                 c+=2;
             }
-            if((p->coordx-i >= 0 && p->coordx+i <=6) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b)
-               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b))
+            if(entro_limiti(p->coordx-i,p->coordy+i) && (mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b)
+               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy+i,b)))
             {
                 flag = 1;
                 coords[c] = p->coordx-i;
@@ -303,8 +317,4 @@ enum giocatore winner(Board board,enum giocatore player1,enum giocatore player2)
     return -1;
 }
 
-int entro_limiti(int x, int y)
-{
-    return !(x<0 || x>6 || y<0 || y>6);
-}
 #endif //UNTITLED1_BOARD_H

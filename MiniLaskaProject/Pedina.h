@@ -20,13 +20,17 @@ Pedina_list init_pedina(int x, int y, enum giocatore colore,enum stato s)
 {
     Pedina_list p;
     p = malloc(sizeof(struct pedina));
-    p->coordx = x;
-    p->coordy = y;
-    p->colore = colore;
-    p->stato = s;
-    p->next = NULL;
+    if(p)
+    {
+        p->coordx = x;
+        p->coordy = y;
+        p->colore = colore;
+        p->stato = s;
+        p->next = NULL;
 
-    return p;
+        return p;
+    }
+    return NULL;
 }
 
 void delete_pedina(Pedina_list *p)
@@ -82,30 +86,35 @@ void elimina_coda(Pedina_list *p)
     }
 }
 
-void append(Pedina_list *p,struct pedina p1)
+int append(Pedina_list *p,struct pedina p1)
 {
     Pedina_list tmp;
     Pedina_list scorri;
     tmp = (Pedina_list)malloc(sizeof(struct pedina));
-    tmp->coordx = p1.coordx;
-    tmp->coordy = p1.coordy;
-    tmp->colore = p1.colore;
-    tmp->stato = p1.stato;
-    tmp->next = NULL;
-    scorri = *p;
+    if(tmp)
+    {
+        tmp->coordx = p1.coordx;
+        tmp->coordy = p1.coordy;
+        tmp->colore = p1.colore;
+        tmp->stato = p1.stato;
+        tmp->next = NULL;
+        scorri = *p;
 
-    if(scorri)
-    {
-        while(scorri->next)
+        if(scorri)
         {
-            scorri = (scorri)->next;
+            while(scorri->next)
+            {
+                scorri = (scorri)->next;
+            }
+            scorri->next = tmp;
         }
-        scorri->next = tmp;
+        else
+        {
+            *p = tmp;
+        }
+        return 1;
     }
-    else
-    {
-        *p = tmp;
-    }
+    return 0;
 }
 
 #endif //UNTITLED1_PEDINA_H
