@@ -37,8 +37,11 @@ void delete_pedina(Pedina_list *p)
 {
     if(*p)
     {
+        Pedina_list *tmp;
         if((*p)->next) delete_pedina(&(*p)->next);
-        free(*p);
+        tmp = p;
+        free(*tmp);
+        *p = NULL;
     }
 }
 

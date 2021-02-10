@@ -5,9 +5,19 @@
 
 #define MOSSE_DISPONIBILI 64
 
+void congratulations(Board b)
+{
+    print_board(b);
+    if(winner(b,BLUE,RED) == BLUE)
+        printf("\n\Congratulazioni giocatore BLUE! Hai vinto\n");
+    else if(winner(b,BLUE,RED) == RED)
+        printf("\nCongratulazioni giocatore RED! Hai vinto");
+}
+
 int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
 {
-    if(winner(b,player1,player2)!=player2)
+
+    if(winner(b,player1,player2)==-1)
     {
         int x1,y1,x2,y2;
 
@@ -40,6 +50,7 @@ int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
             return partita1v1(b,player1,player2);
         }
     }
+    congratulations(b);
     return winner(b,player1,player2);
 }
 
@@ -63,7 +74,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
     altro = (player == BLUE) ? RED : BLUE;
     maxpunti = -100;
 
-    if(rec < 33 && winner(b,BLUE,RED) == -1) {
+    if(rec < 3 && winner(b,BLUE,RED) == -1) {
         for (int i = 0; i < 7; ++i) {
             for (int j = 0; j < 7; ++j) {
                 if (b->vet[i][j] && b->vet[i][j]->colore == player) {
@@ -76,7 +87,6 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                         for (int k = 0; k < 8 && vett[k] != 0; k += 2) {
                             Board tmp;
                             tmp = clone_board(b);
-
                             if(tmp && mangia_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
                             {
                                 mangia(tmp->vet[i][j],vett[k],vett[k+1],tmp);
@@ -86,11 +96,12 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
 
                                 if(i==6 || i==2)
                                 {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-1 : chiamata_ricorsiva+1;
+                                    if(b->vet[i][j]->stato != GENERALE)
+                                        chiamata_ricorsiva+=1;
                                 }
                                 if(winner(tmp,player,altro) != -1)
                                 {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-3 : chiamata_ricorsiva+3;
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-10 : chiamata_ricorsiva+10;
                                 }
                                 if(chiamata_ricorsiva > highest){
 
@@ -104,8 +115,15 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                 muovi_legale_wrapper(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
 
-                                if(i==6 || i==2) chiamata_ricorsiva+=2;
-
+                                if(i==6 || i==2)
+                                {
+                                    if(b->vet[i][j]->stato != GENERALE)
+                                        chiamata_ricorsiva+=1;
+                                }
+                                if(winner(tmp,player,altro) != -1)
+                                {
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-10 : chiamata_ricorsiva+10;
+                                }
                                 if(chiamata_ricorsiva > highest){
                                     if(player == color_start)
                                     {
@@ -115,6 +133,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                     highest = chiamata_ricorsiva;
                                 }
                             }
+                            delete_board(&tmp);
                         }
                         if(highest > maxpunti)
                         {
@@ -136,22 +155,50 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
         return 0;
     return maxpunti;
 }
+int prima_mossa(Board b,int *x1,int *y1,int *x2, int *y2, enum giocatore player)
+{
+    int vett[8] = {0,0,0,0,0,0,0,0};
+    int flag;
+    flag = 0;
+
+    for (int i = 0; i < 7 && !flag; ++i) {
+        for (int j = 0; j < 7 && !flag; ++j) {
+            if(b->vet[i][j] && b->vet[i][j]->colore == player)
+            {
+                if(has_moves(b->vet[i][j],b,vett))
+                {
+                    flag = 1;
+                    *x1 = i;
+                    *y1 = j;
+                    *x2 = vett[0];
+                    *y2 = vett[1];
+                }
+            }
+        }
+    }
+    return flag;
+}
 
 int ai_move(Board b, enum giocatore pcplayer)
 {
     int x,y,x2,y2;
-    punti_percorso(b,pcplayer,0,pcplayer,&x,&y,&x2,&y2);
-    if(muovi_legale_wrapper(b->vet[x][y],x2,y2,b)){
-        printf("~ Ho mosso da (%d,%d) a (%d,%d)",x,y,x2,y2);
-        return 1;
+    if(winner(b,BLUE,RED)==-1 )
+    {
+        if(prima_mossa(b,&x,&y,&x2,&y2,pcplayer))
+            punti_percorso(b,pcplayer,0,pcplayer,&x,&y,&x2,&y2);
+        if(muovi_legale_wrapper(b->vet[x][y],x2,y2,b)){ //&& entro_limiti(x,y) && entro_limiti(x2,y2)
+            printf("\n~ Ho mosso da (%d,%d) a (%d,%d)\n",x,y,x2,y2);
+            return 1;
+        }
+        printf("non ho mosso da (%d,%d) a (%d,%d)\n",x,y,x2,y2);
+        return 0;
     }
-    printf("non ho mosso da (%d,%d) a (%d,%d)",x,y,x2,y2);
     return 0;
 }
 
 int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
-    if(winner(b,player1,player2)!=player2)
+    if(winner(b,player1,player2)==-1)
     {
         int x1,y1,x2,y2;
 
@@ -191,49 +238,62 @@ int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
         }
 
     }
+    congratulations(b);
     return winner(b,player1,player2);
 }
 
-void congratulations(Board b)
+int partitaCPUvCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
-    if(winner(b,BLUE,RED) == BLUE)
-        printf("\n\nCongratulazioni giocatore BLUE! Hai vinto\n");
-    else if(winner(b,BLUE,RED) == RED)
-        printf("\nCongratulazioni giocatore RED! Hai vinto");
+    if(winner(b,player1,player2)==-1)
+    {
+        if(ai_move(b,player1))
+            print_board(b);
+        return partitaCPUvCPU(b,player2,player1);
+    }
+    congratulations(b);
+    return winner(b,player1,player2);
 }
 
-int main_menu(int mode)
+int main_menu()
 {
-    Board b = init_board();
+    int mode,gioc;
+
+    Board b;
     enum giocatore player1 = BLUE;
     enum giocatore player2 = RED;
+    b = init_board();
 
+    printf("\nSeleziona la modalita: \n- 1 vs 1 -> [1] \n- 1 vs CPU -> [2] \n- CPU vs CPU -> [3] \n- Exit -> [tasto qualunque]\n");
+    scanf("%d",&mode);
+
+    printf("Seleziona il giocatore: \n- BLU -> [1]\n- ROSSO -> [2]\n");
+    scanf("%d",&gioc);
     if(mode == 1)
     {
-        return partita1v1(b,player1,player2);
+        if(gioc == 1)
+            partita1v1(b,BLUE, RED);
+        else
+            partita1v1(b,RED,BLUE);
     }
-    delete_board(b);
+    if(mode == 2)
+    {
+        if(gioc == 1)
+            partita1vCPU(b,BLUE, RED);
+        else
+            partita1vCPU(b,RED,BLUE);
+    }
+    if(mode == 3)
+    {
+        if(gioc == 1)
+            partitaCPUvCPU(b,BLUE, RED);
+        else
+            partitaCPUvCPU(b,RED,BLUE);
+    }
+    delete_board(&b);
     return 0;
 }
 
 int main() {
 
-    Board tmp;
-    Board b = init_board();
-    /*
-    muovi_legale_wrapper(b->vet[2][2],3,3,b);
-    //mangia(b->vet[4][4],2,2,b);
-    //tmp = clone_board(b);
-    print_board(b);
-
-    //main_menu(1);
-
-    muovi_legale_wrapper(b->vet[2][2],3,3,b);
-    muovi_legale_wrapper(b->vet[4][4],2,2,b);
-    muovi_legale_wrapper(b->vet[1][3],3,1,b);
-    print_board(b);
-    ai_move(b,RED);
-     */
-    partita1vCPU(b,BLUE,RED);
-
+    main_menu();
 }

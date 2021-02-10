@@ -47,14 +47,20 @@ Board init_empty_board()
     return NULL;
 }
 
-void delete_board(Board b)
+void delete_board(Board *b)
 {
-    for (int i = 0; i < 7; ++i) {
-        for (int j = 0; j < 7; ++j) {
-            delete_pedina(&b->vet[i][j]);
+    if(*b)
+    {
+        Board *tmp;
+        tmp = b;
+        for (int i = 0; i < 7; ++i) {
+            for (int j = 0; j < 7; ++j) {
+                delete_pedina(&(*b)->vet[i][j]);
+            }
         }
+        free(*tmp);
+        *b = NULL;
     }
-    free(b);
 }
 
 Board clone_board(Board b)
@@ -197,20 +203,24 @@ int mangia_legale(Pedina_list p,int x, int y,Board b)
 
 int mangia(Pedina_list p, int x, int y, Board b)
 {
-    if(mangia_legale(p,x,y,b))
+    if(p && b)
     {
-        int xmangiato, ymangiato;
-        Pedina_list mangiato;
+        if(mangia_legale(p,x,y,b))
+        {
+            int xmangiato, ymangiato;
+            Pedina_list mangiato;
 
-        xmangiato = (p->coordx + x) / 2;
-        ymangiato = (p->coordy + y) / 2;
+            xmangiato = (p->coordx + x) / 2;
+            ymangiato = (p->coordy + y) / 2;
 
-        append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
-        elimina_testa(&b->vet[xmangiato][ymangiato]);
-        if(contastack(b->vet[p->coordx][p->coordy])>3)
-            elimina_coda(&b->vet[p->coordx][p->coordy]);
-        muovi(p,x,y,b);
-        return 1;
+            append(&b->vet[p->coordx][p->coordy],*b->vet[xmangiato][ymangiato]);
+            elimina_testa(&b->vet[xmangiato][ymangiato]);
+            if(contastack(b->vet[p->coordx][p->coordy])>3)
+                elimina_coda(&b->vet[p->coordx][p->coordy]);
+            muovi(p,x,y,b);
+            return 1;
+        }
+        return 0;
     }
     return 0;
 }
@@ -262,8 +272,8 @@ int has_moves(Pedina_list p,Board b,int *coords)
                 coords[c+1] = p->coordy+i;
                 c+=2;
             }
-            if(entro_limiti(p->coordx-i,p->coordy-i) && mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)
-               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b))
+            if(entro_limiti(p->coordx-i,p->coordy-i) && (mossa_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)
+               || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx-i,p->coordy-i,b)))
             {
                 flag = 1;
                 coords[c] = p->coordx-i;
