@@ -3,4 +3,4 @@ project(untitled1 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(untitled1 main.c Pedina.h Board.h)
+add_executable(untitled1 main.c Pedina.h Board.h AI.h Gfx.h)

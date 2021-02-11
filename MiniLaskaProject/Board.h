@@ -208,7 +208,6 @@ int mangia(Pedina_list p, int x, int y, Board b)
         if(mangia_legale(p,x,y,b))
         {
             int xmangiato, ymangiato;
-            Pedina_list mangiato;
 
             xmangiato = (p->coordx + x) / 2;
             ymangiato = (p->coordy + y) / 2;

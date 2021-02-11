@@ -74,7 +74,13 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/AI.h">
+			<Option target="untitled1"/>
+		</Unit>
 		<Unit filename="C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Board.h">
+			<Option target="untitled1"/>
+		</Unit>
+		<Unit filename="C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Gfx.h">
 			<Option target="untitled1"/>
 		</Unit>
 		<Unit filename="C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Pedina.h">
