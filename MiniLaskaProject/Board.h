@@ -98,6 +98,7 @@ void print_row_occ(Board b,int r)
 
 void print_board(Board board)
 {
+
     if(!board) return;
     printf("  0 1 2 3 4 5 6 \n");
     for (int i = 0; i < 7; ++i) {
@@ -128,7 +129,9 @@ void print_board(Board board)
         printf("\n");
     }
     printf("  y y y y y y y \n");
+
 }
+
 
 /* muove una pedina, ATTENZIONE, NON controlla se la mossa è valida secondo le regole di gioco,
  * ma solo se la mossa è limitata al campo.

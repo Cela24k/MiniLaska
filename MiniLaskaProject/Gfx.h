@@ -8,56 +8,81 @@
 #define RASTERX 71
 #define RASTERY 29
 
-/*
- *          +---------+---------+
- *          |    R    |
- *          |    b    |
- *          |    r    |
- *          *---------+
- */
+char raster[RASTERY][RASTERX];
 
-int color_casella(Pedina_list p,int k)
+void printa_raster()
 {
-    int out;
-
-    for (int i = 0; i < k && p; ++i) {
-        out = p->colore;
-        p = p->next;
+    printf("  - -0------ --1------ --2------ ---3----  -- 4----  ---5----  ---6- ---\n");
+    printf(" /||/|/|///  |/|/|///  /| /|///   /|Y|///     /|///     /|///    /  /|/||\n");
+    for (int i = 0; i < RASTERY; ++i) {
+        for (int j = 0; j < RASTERX; ++j) {
+            printf("%c",raster[i][j]);
+        }
+        if(i==RASTERY-2)
+            printf(" /\n");
+        else if(i == RASTERY-1)
+            printf(" \n");
+        else if(i == RASTERY /2)
+            printf("X|\n");
+        else if((i-2)%4 == 0)
+            printf("%d|\n",i/4);
+        else
+            printf(" |\n");
     }
-    return out;
 }
 
-char** crea_raster(Board b)
+char lettera_pedina(Pedina_list p)
 {
-    char **out;
-    out = malloc(sizeof(char *)*RASTERX);
-
-    for (int i = 0; i < RASTERX; ++i) {
-        out[i] = malloc(sizeof(char)*RASTERY);
+    if(p)
+    {
+        if(p->colore == BLUE)
+        {
+            if(p->stato == GENERALE)
+                return 'B';
+            else return 'b';
+        }
+        else
+        {
+            if(p->stato == GENERALE)
+                return 'R';
+            else return 'r';
+        }
     }
-    return out;
+    return ' ';
+}
+void raster_con_sprite(Board b)
+{
+    for (int i = 0; i < 7; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            if(b->vet[i][j])
+            {
+                raster[(i*4)+1][(j*10)+5] = lettera_pedina(b->vet[i][j]);
+                if(b->vet[i][j]->next)
+                {
+                    raster[(i*4)+2][(j*10)+5] = lettera_pedina(b->vet[i][j]->next);
+                    if(b->vet[i][j]->next->next)
+                    {
+                        raster[(i*4)+3][(j*10)+5] = lettera_pedina(b->vet[i][j]->next->next);
+                    }
+                }
+            }
+        }
+    }
 }
 
-void printa_raster(char **vet)
+void init_raster()
 {
     for (int i = 0; i < RASTERY; ++i) {
         for (int j = 0; j < RASTERX; ++j) {
-            printf("%c",vet[i][j]);
+            if(j %10 == 0 && i%4 == 0)
+                raster[i][j] = '+';
+            else if(i%4 == 0)
+                raster[i][j] = '-';
+            else if(j%10 == 0)
+                raster[i][j] = '|';
+            else raster[i][j] = ' ';
         }
-        printf("\n");
     }
 }
-
-void riempi_raster(Board b,char **vet)
-{
-    for (int i = 0; i < RASTERY ; i+=4) {
-            vet[i] =    "+---------+---------+---------+---------+---------+---------+---------+";
-            vet[i+1] =  "|         |         |         |         |         |         |         |";
-            vet[i+2] =  "|         |         |         |         |         |         |         |";
-            vet[i+3] =  "|         |         |         |         |         |         |         |";
-    }
-
-}
-
 
 #endif //UNTITLED1_GFX_H

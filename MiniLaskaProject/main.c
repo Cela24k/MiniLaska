@@ -1,35 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "Pedina.h"
 #include "Board.h"
 #include "AI.h"
 #include "Gfx.h"
 
-#define MOSSE_DISPONIBILI 64
-
-int randint(int n) {
-    if ((n - 1) == RAND_MAX) {
-        return rand();
-    } else {
-
-        int end = RAND_MAX / n;
-        int r;
-
-        if (n <= RAND_MAX)
-        if (end > 0)
-        end *= n;
-
-        while ((r = rand()) >= end);
-
-        return r % n;
-    }
+void print_game(Board b)
+{
+    init_raster();
+    raster_con_sprite(b);
+    printa_raster();
 }
 
 void congratulations(Board b)
 {
     printf("\n");
-    print_board(b);
+    print_game(b);
     if(winner(b,BLUE,RED) == BLUE)
         printf("\nCongratulazioni giocatore BLUE! Hai vinto\n");
     else if(winner(b,BLUE,RED) == RED)
@@ -44,7 +32,7 @@ int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
         int x1,y1,x2,y2;
 
         printf("\n\n");
-        print_board(b);
+        print_game(b);
 
         if(player1==BLUE)
             printf("\nGiocatore BLU: \n");
@@ -76,18 +64,6 @@ int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
     return winner(b,player1,player2);
 }
 
-int check_move(Board b,int x,int y, Pedina_list p)
-{
-    if(mangia_legale(b->vet[p->coordx][p->coordy],x,y,b) && (x==6 || x == 0))
-        return 1+2;
-    if(mangia_legale(b->vet[p->coordx][p->coordy],x,y,b))
-        return 1;
-    if(mossa_legale(b->vet[p->coordx][p->coordy],x,y,b) && (x==6 || x == 0))
-        return 2;
-    if(mossa_legale(b->vet[p->coordx][p->coordy],x,y,b))
-        return 0;
-}
-
 
 int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
@@ -96,7 +72,7 @@ int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
         int x1,y1,x2,y2;
 
         printf("\n\n");
-        print_board(b);
+        print_game(b);
 
         if(player1==BLUE)
         {
@@ -137,43 +113,21 @@ int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
 
 int partitaCPUvCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
-    srand(time(NULL));
-
-
     if(winner(b,player1,player2)==-1)
     {
-        int rx = rand();
-        int ry = rand();
-
+        print_game(b);
         ai_move(b,player1);
-
+        return partitaCPUvCPU(b,player2,player1);
     }
     congratulations(b);
     return winner(b,player1,player2);
 }
-/*
-int partitaCPUvsRANDOM(Board b, enum giocatore player1, enum giocatore player2)
-{
-    if(winner(b,player1,player2))
-    {
-        int x,y;
-        while(muovi_legale_wrapper(b->))
-        x = randint(7);
 
-        if(ai_move(b,player1))
-            print_board(b);
-
-        return
-    }
-}
- */
 int main_menu()
 {
     int mode,gioc;
 
     Board b;
-    enum giocatore player1 = BLUE;
-    enum giocatore player2 = RED;
     b = init_board();
 
     printf("\nSeleziona la modalita: \n- 1 vs 1 -> [1] \n- 1 vs CPU -> [2] \n- CPU vs CPU -> [3] \n- Exit -> [tasto qualunque]\n");
@@ -208,14 +162,6 @@ int main_menu()
 
 int main() {
 
-
-    //main_menu();
-    Board b;
-    init_board(&b);
-
-    char **vett;
-    vett = crea_raster(b);
-    riempi_raster(b,vett);
-    printa_raster(vett);
+    main_menu();
 
 }
