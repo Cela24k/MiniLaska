@@ -11,8 +11,8 @@ typedef struct pedina
 {
     int coordx;
     int coordy;
-    enum giocatore colore;
-    enum stato stato;
+    enum giocatore colore; /* colore della pedina in testa*/
+    enum stato stato; /*stato della pedina, GENERALE/NORMALE*/
     struct pedina *next;
 } *Pedina_list;
 

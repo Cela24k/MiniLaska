@@ -133,24 +133,28 @@ int main_menu()
     printf("\nSeleziona la modalita: \n- 1 vs 1 -> [1] \n- 1 vs CPU -> [2] \n- CPU vs CPU -> [3] \n- Exit -> [tasto qualunque]\n");
     scanf("%d",&mode);
 
-    printf("Seleziona il giocatore: \n- BLU -> [1]\n- ROSSO -> [2]\n");
-    scanf("%d",&gioc);
     if(mode == 1)
     {
+        printf("Chi inizia: \n- BLU -> [1]\n- ROSSO -> [2]\n");
+        scanf("%d",&gioc);
         if(gioc == 1)
             partita1v1(b,BLUE, RED);
         else
             partita1v1(b,RED,BLUE);
     }
-    if(mode == 2)
+    else if(mode == 2)
     {
+        printf("Chi inizia: \n- GIOCATORE -> [1]\n- CPU -> [2]\n");
+        scanf("%d",&gioc);
         if(gioc == 1)
             partita1vCPU(b,BLUE, RED);
         else
             partita1vCPU(b,RED,BLUE);
     }
-    if(mode == 3)
+    else if(mode == 3)
     {
+        printf("Chi inizia: \n- BLU -> [1]\n- ROSSO -> [2]\n");
+        scanf("%d",&gioc);
         if(gioc == 1)
             partitaCPUvCPU(b,BLUE, RED);
         else
@@ -162,6 +166,10 @@ int main_menu()
 
 int main() {
 
-    main_menu();
-
+    //main_menu();
+    Board b = init_board();
+    muovi_legale_wrapper(b->vet[2][0],3,1,b);
+    print_board(b);
+    muovi_legale_wrapper(b->vet[4][2],2,0,b);
+    print_game(b);
 }

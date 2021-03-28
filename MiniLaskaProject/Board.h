@@ -132,15 +132,18 @@ void print_board(Board board)
 
 }
 
+int entro_limiti(int x, int y)
+{
+    return !(x<0 || x>6 || y<0 || y>6);
+}
 
 /* muove una pedina, ATTENZIONE, NON controlla se la mossa è valida secondo le regole di gioco,
  * ma solo se la mossa è limitata al campo.
  */
-
 int muovi(Pedina_list p,int x, int y,Board b)
 {
     if(!p) return 0;
-    if(x >= 0 && y >= 0 && x<7 && y<7 && !b->vet[x][y])
+    if(entro_limiti(x,y)&& !b->vet[x][y])
     {
         Pedina_list tmp;
         tmp = b->vet[p->coordx][p->coordy];
@@ -148,13 +151,12 @@ int muovi(Pedina_list p,int x, int y,Board b)
         b->vet[p->coordx][p->coordy] = b->vet[x][y];
         b->vet[x][y] = tmp;
 
-        while(p)
+        if(p)
         {
             if(x == 0 || x==6)
                 p->stato = GENERALE;
             p->coordx = x;
             p->coordy = y;
-            p = p->next;
         }
         return 1;
     }
@@ -165,6 +167,8 @@ int muovi(Pedina_list p,int x, int y,Board b)
  * muove una Pedina_list secondo le regole di gioco,
  * se non è possibile con gli argomenti proposti restituisce 0;
  */
+/* pre: la pedina è una pedina della scacchiera*/
+/* post: restituire 1 se la mossa proposta da p->coordx,p->coordy a x, y è legale.*/
 
 int legale(Pedina_list p,int x, int y,Board b,int k)
 {
@@ -189,21 +193,35 @@ int legale(Pedina_list p,int x, int y,Board b,int k)
         }
     else return 0;
 }
-
+/*controlla se la mossa può essere fatta, senza svolgerla*/
 int mossa_legale(Pedina_list p,int x, int y,Board b)
 {
     return legale(p,x,y,b,1);
 }
 
+
+/*controlla se la pedina in input esiste,
+ * poi calcola le coordinate della pedina che sta venendo mangiata
+ * e controlla che in quelle coordinate ci sia una pedina di colore diverso
+ * dalla pedina in input,
+ * restituisce 1 se è una mossa di mangiata valida ma NON mangia, 0 altrimenti*/
 int mangia_legale(Pedina_list p,int x, int y,Board b)
 {
+    int mangiatox;
+    int mangiatoy;
+
     if(!p) return 0;
-    int mangiatox = (p->coordx+x)/2;
-    int mangiatoy = (p->coordy+y)/2;
+    mangiatox = (p->coordx+x)/2;
+    mangiatoy = (p->coordy+y)/2;
 
     return (legale(p,x,y,b,2)&&b->vet[mangiatox][mangiatoy]&&(b->vet[mangiatox][mangiatoy]->colore != p->colore));
 }
 
+/*funzione per mangiare in modo safe, se la pedina esiste, la board esiste
+ * e se la funzione "mangia_legale" restituisce true,
+ * fa la append alla lista di pedine in posizione p->coordx e p->coordy dell'elemento in testa
+ * alla lista di pedine che viene mangiata, poi lo elimina dalla pedina di partenza.
+ * */
 int mangia(Pedina_list p, int x, int y, Board b)
 {
     if(p && b)
@@ -227,6 +245,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
     return 0;
 }
 
+/*controlla se il movimento è legale con la funzione "mossa_legale" poi muove con la "muovi"*/
 int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 {
     if(mossa_legale(p,x,y,b))
@@ -236,6 +255,8 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
     else return 0;
 }
 
+/* riceve un colore in input, se non viene trovata una pedina del colore opposto ritorna 1,
+ * altrimenti 0 */
 int has_all_pieces(enum giocatore player, Board b)
 {
     int flg = 1;
@@ -246,11 +267,6 @@ int has_all_pieces(enum giocatore player, Board b)
         }
     }
     return flg;
-}
-
-int entro_limiti(int x, int y)
-{
-    return !(x<0 || x>6 || y<0 || y>6);
 }
 
 // restituisce true o false (o -1 se non esiste la pedina)

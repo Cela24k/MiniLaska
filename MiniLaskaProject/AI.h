@@ -13,7 +13,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
     altro = (player == BLUE) ? RED : BLUE;
     maxpunti = -100;
 
-    if(rec < 3 && winner(b,BLUE,RED) == -1) {
+    if(rec < 5 && winner(b,BLUE,RED) == -1) {
         for (int i = 0; i < 7; ++i) {
             for (int j = 0; j < 7; ++j) {
                 if (b->vet[i][j] && b->vet[i][j]->colore == player) {
@@ -40,7 +40,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                 }
                                 if(winner(tmp,player,altro) != -1)
                                 {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-10 : chiamata_ricorsiva+10;
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-5 : chiamata_ricorsiva+5;
                                 }
                                 if(chiamata_ricorsiva > highest){
 
@@ -61,7 +61,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                 }
                                 if(winner(tmp,player,altro) != -1)
                                 {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-10 : chiamata_ricorsiva+10;
+                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-3 : chiamata_ricorsiva+3;
                                 }
                                 if(chiamata_ricorsiva > highest){
                                     if(player == color_start)
@@ -94,6 +94,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
         return 0;
     return maxpunti;
 }
+
 int prima_mossa(Board b,int *x1,int *y1,int *x2, int *y2, enum giocatore player)
 {
     int vett[8] = {0,0,0,0,0,0,0,0};
