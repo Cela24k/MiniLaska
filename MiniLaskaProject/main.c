@@ -166,10 +166,12 @@ int main_menu()
 
 int main() {
 
-    //main_menu();
+    main_menu();
+    /*
     Board b = init_board();
     muovi_legale_wrapper(b->vet[2][0],3,1,b);
     print_board(b);
     muovi_legale_wrapper(b->vet[4][2],2,0,b);
     print_game(b);
+     */
 }
