@@ -11,11 +11,16 @@ typedef struct pedina
 {
     int coordx;
     int coordy;
-    enum giocatore colore; /* colore della pedina in testa*/
-    enum stato stato; /*stato della pedina, GENERALE/NORMALE*/
+    enum giocatore colore;  /* colore della pedina in testa*/
+    enum stato stato;       /*stato della pedina, GENERALE/NORMALE*/
     struct pedina *next;
 } *Pedina_list;
 
+/*
+ * Inizializza in memoria una pedina con determinate coordinate, un colore e uno stato,
+ * dopodichè restituisce il suo riferimento.
+ * Se la malloc non va a buon fine, restituisce NULL;
+ */
 Pedina_list init_pedina(int x, int y, enum giocatore colore,enum stato s)
 {
     Pedina_list p;
@@ -33,6 +38,10 @@ Pedina_list init_pedina(int x, int y, enum giocatore colore,enum stato s)
     return NULL;
 }
 
+/*
+ * Questa funzione viene chiamata specularmente alla allocazione in memoria della pedina,
+ * libera la pedina e le sue successive dalla memoria.
+ */
 void delete_pedina(Pedina_list *p)
 {
     if(*p)
@@ -45,7 +54,8 @@ void delete_pedina(Pedina_list *p)
     }
 }
 
-int contastack(Pedina_list pedina) // utility, restituisce quante pedine ha un determinato stack di pedine
+// Utility, data una Pedina_list restituisce quante pedine si susseguono in quel determinato stack.
+int contastack(Pedina_list pedina)
 {
     int c;
     Pedina_list tmp;
@@ -60,7 +70,7 @@ int contastack(Pedina_list pedina) // utility, restituisce quante pedine ha un d
 
     return c;
 }
-
+// Data una Pedina_list*, rimuove la testa e la libera dalla memoria.
 void elimina_testa(Pedina_list *p)
 {
     if(*p)
@@ -72,6 +82,7 @@ void elimina_testa(Pedina_list *p)
     }
 }
 
+// Data una Pedina_list*, rimuove la coda e la libera dalla memoria
 void elimina_coda(Pedina_list *p)
 {
     Pedina_list tmp;
@@ -88,7 +99,9 @@ void elimina_coda(Pedina_list *p)
         free(tmp);
     }
 }
-
+// Data una Pedina_list* e l'elemento da inserire,
+// effettua l'append di tale elemento alla lista.
+// restituisce 1 se è andato a buon fine 0 se non va a buon fine.
 int append(Pedina_list *p,struct pedina p1)
 {
     Pedina_list tmp;
