@@ -4,44 +4,42 @@
 
 #ifndef UNTITLED1_AI_H
 #define UNTITLED1_AI_H
+#define RICORSIONI 4
 
+/*
+ *
+ */
 int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *x1out, int *y1out ,int *x2out,int *y2out)
 {
     enum giocatore altro;
     int maxpunti;
 
     altro = (player == BLUE) ? RED : BLUE;
-    maxpunti = -100;
+    maxpunti = -100; //vengono immagazzinati i punti di un percorso nella chiamata corrente
 
-    if(rec < 5 && winner(b,BLUE,RED) == -1) {
-        for (int i = 0; i < 7; ++i) {
+    if(rec < RICORSIONI && winner(b,BLUE,RED) == -1) { //rec < 5 se ho fatto meno di 5 chiamate ricorsive
+
+        for (int i = 0; i < 7; ++i) { //vado a studiare tutte le pedine con un for annidato per assegnare a ciascuna pedina un set di mosse disponibili
             for (int j = 0; j < 7; ++j) {
                 if (b->vet[i][j] && b->vet[i][j]->colore == player) {
                     int vett[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-                    if (has_moves(b->vet[i][j], b, vett)) {
+
+                    if (has_moves(b->vet[i][j], b, vett)) { //se la pedina esiste ed è del colore desiderato, se ha mosse le inserisco nell'array
+
                         int highest;
                         int xtmp,ytmp;
                         highest = -100;
 
-                        for (int k = 0; k < 8 && vett[k] != 0; k += 2) {
+                        for (int k = 0; k < 8 && vett[k] != 0; k += 2) { //studio tutte le mosse dell'array
                             Board tmp;
-                            tmp = clone_board(b);
-                            if(tmp && mangia_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
+                            tmp = clone_board(b); // clono la board corrente per poter simulare una mossa senza corrompere la board vera
+
+                            if(tmp && mangia_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp)) //se può mangiare predi
                             {
                                 mangia(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = (altro == color_start) ?
                                                          1 + punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out)
                                                                                 :  - 1 + punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
-
-                                if(i==6 || i==2)
-                                {
-                                    if(b->vet[i][j]->stato != GENERALE)
-                                        chiamata_ricorsiva+=1;
-                                }
-                                if(winner(tmp,player,altro) != -1)
-                                {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-5 : chiamata_ricorsiva+5;
-                                }
                                 if(chiamata_ricorsiva > highest){
 
                                     xtmp = vett[k];
@@ -54,15 +52,6 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                 muovi_legale_wrapper(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
 
-                                if(i==6 || i==2)
-                                {
-                                    if(b->vet[i][j]->stato != GENERALE)
-                                        chiamata_ricorsiva+=1;
-                                }
-                                if(winner(tmp,player,altro) != -1)
-                                {
-                                    chiamata_ricorsiva = (player != color_start) ? chiamata_ricorsiva-3 : chiamata_ricorsiva+3;
-                                }
                                 if(chiamata_ricorsiva > highest){
                                     if(player == color_start)
                                     {
