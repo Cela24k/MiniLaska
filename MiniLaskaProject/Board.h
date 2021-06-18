@@ -144,10 +144,9 @@ int muovi(Pedina_list p,int x, int y,Board b)
  * posizione secondo le regole di gioco.
  * - se non è possibile con gli argomenti proposti restituisce 0;
  * - se è possibile muovere restituisce 1;
+ *
+ *  restituisce 1 se la mossa proposta da p->coordx,p->coordy a x, y è legale, ma NON muove.
  */
-/* pre: la pedina è una pedina della scacchiera*/
-/* post: restituire 1 se la mossa proposta da p->coordx,p->coordy a x, y è legale.*/
-
 int legale(Pedina_list p,int x, int y,Board b,int k)
 {
     if(!p || b->vet[x][y] != NULL) return 0;
@@ -171,7 +170,10 @@ int legale(Pedina_list p,int x, int y,Board b,int k)
         }
     else return 0;
 }
-/*controlla se la mossa può essere fatta, senza svolgerla*/
+
+/*
+ * controlla se la mossa può essere fatta, senza svolgerla
+ * */
 int mossa_legale(Pedina_list p,int x, int y,Board b)
 {
     return legale(p,x,y,b,1);
@@ -231,7 +233,8 @@ int mangia(Pedina_list p, int x, int y, Board b)
  * controlla se il movimento è legale come "semplice movimento" con la funzione "mossa_legale",
  * controlla in altro caso se è una "mossa per mangiare" con la funzione "mangia_legale",
  * infine a seconda del tipo di movimento muove con la "muovi" e restituisce 1 se va a buon fine,
- * restituisce 0 se non è una mossa legale e neanche un mangia legale*/
+ * restituisce 0 se non è una mossa legale e neanche un mangia legale
+ * */
 int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 {
     if(mossa_legale(p,x,y,b))
