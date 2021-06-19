@@ -54,6 +54,7 @@ int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
         printf("y2: ");
         scanf("%d",&y2);
 
+
         if(entro_limiti(x1,y1) && entro_limiti(x2,y2) && b->vet[x1][y1]
             && b->vet[x1][y1]->colore == player1 && muovi_legale_wrapper(b->vet[x1][y1],x2,y2,b))
         {
@@ -183,8 +184,8 @@ int main() {
     /*
     Board b = init_board();
     muovi_legale_wrapper(b->vet[2][0],3,1,b);
-    print_board(b);
-    muovi_legale_wrapper(b->vet[4][2],2,0,b);
+    //print_board(b);
+    muovi_legale_wrapper(b->vet[4][6],3,5,b);
     print_game(b);
-     */
+    */
 }

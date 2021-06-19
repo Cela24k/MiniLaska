@@ -179,7 +179,6 @@ int mossa_legale(Pedina_list p,int x, int y,Board b)
     return legale(p,x,y,b,1);
 }
 
-
 /*
  * controlla se la pedina in input esiste,
  * poi calcola le coordinate della pedina che sta venendo mangiata
@@ -209,7 +208,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
 {
     if(p && b)
     {
-        if(mangia_legale(p,x,y,b))
+        if(mangia_legale(p,x,y,b)) // se è possibile mangiare legalmente nelle coordinate proposte
         {
             int xmangiato, ymangiato;
 
@@ -228,27 +227,12 @@ int mangia(Pedina_list p, int x, int y, Board b)
     return 0;
 }
 
-/*
- * Questa è la funzione più importante che viene invocata dopo una mossa generica,
- * controlla se il movimento è legale come "semplice movimento" con la funzione "mossa_legale",
- * controlla in altro caso se è una "mossa per mangiare" con la funzione "mangia_legale",
- * infine a seconda del tipo di movimento muove con la "muovi" e restituisce 1 se va a buon fine,
- * restituisce 0 se non è una mossa legale e neanche un mangia legale
- * */
-int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
-{
-    if(mossa_legale(p,x,y,b))
-        return muovi(p,x,y,b);
-    else if(mangia_legale(p,x,y,b))
-        return mangia(p,x,y,b);
-    else return 0;
-}
-
 /* riceve un colore in input, se non viene trovata neanche una pedina del colore opposto ritorna 1,
  * altrimenti 0 */
 int has_all_pieces(enum giocatore player, Board b)
 {
-    int flg = 1;
+    int flg;
+    flg = 1;
     for (int i = 0; i < DIMENSION; ++i) {
         for (int j = 0; j < DIMENSION; ++j) {
             if(b->vet[i][j] && b->vet[i][j]->colore != player)
@@ -316,6 +300,66 @@ int has_moves(Pedina_list p,Board b,int *coords)
         return flag;
     }
     else return -1;
+}
+
+/*
+ * Funzione che viene invocato ogni volta che si prova a muovere legalmente, fa fallire la mossa
+ * e avvisa che è obbligatorio mangiare
+ */
+int cattura_forzata(Board b, enum giocatore p1)
+{
+    int flag;
+    int i,j,k;
+    flag = 0;
+
+    for(i = 0;i<DIMENSION;i++)
+    {
+        for(j = 0; j<DIMENSION; j++)
+        {
+            if(b->vet[i][j] && b->vet[i][j]->colore == p1)
+            {
+                int vet[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+                if(has_moves(b->vet[i][j],b,vet)) //controllo se c'è una pedina da mangiare, in caso deve farlo!
+                {
+                    for (k = 0; k < 16 && vet[k] != -1; k+=2) {
+                        if(mangia_legale(b->vet[i][j],vet[k],vet[k+1],b))
+                            flag = 1;
+                    }
+                }
+            }
+        }
+    }
+    return flag;
+}
+
+/*
+ * Questa è la funzione più importante che viene invocata dopo una mossa generica,
+ * controlla se il movimento è legale come "semplice movimento" con la funzione "mossa_legale",
+ * controlla in altro caso se è una "mossa per mangiare" con la funzione "mangia_legale",
+ * infine a seconda del tipo di movimento muove con la "muovi" e restituisce 1 se va a buon fine,
+ * restituisce 0 se non è una mossa legale e neanche un mangia legale
+ * */
+int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
+{
+    if(cattura_forzata(b,p->colore) == 0)
+    {
+        if(mangia_legale(p,x,y,b))
+            return mangia(p,x,y,b);
+        else if(mossa_legale(p,x,y,b))
+            return muovi(p,x,y,b);
+        else return 0;
+    }
+    else
+    {
+        if(mangia_legale(p,x,y,b))
+            return mangia(p,x,y,b);
+        else
+        {
+            printf("\nAttento, devi mangiare\n");
+            return 0;
+        }
+    }
+
 }
 
 /*

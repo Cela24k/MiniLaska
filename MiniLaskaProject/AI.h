@@ -30,7 +30,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
         for (int i = 0; i < 7; ++i) { //vado a studiare tutte le pedine con un for annidato per assegnare a ciascuna pedina un set di mosse disponibili
             for (int j = 0; j < 7; ++j) {
                 if (b->vet[i][j] && b->vet[i][j]->colore == player) {
-                    int vett[MOSSETOT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                    int vett[MOSSETOT] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
                     if (has_moves(b->vet[i][j], b, vett)) { //se la pedina esiste ed è del colore desiderato, se ha mosse le inserisco nell'array
 
@@ -38,7 +38,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                         int xtmp,ytmp;
                         highest = -100;
 
-                        for (int k = 0; k < MOSSETOT && vett[k] != 0; k += 2) { //studio tutte le mosse dell'array
+                        for (int k = 0; k < MOSSETOT && vett[k] != -1; k += 2) { //studio tutte le mosse della pedina
                             Board tmp;
                             tmp = clone_board(b); // clono la board corrente per poter simulare una mossa senza corrompere la board vera
 
@@ -55,7 +55,7 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
                                     highest = chiamata_ricorsiva;
                                 }
                             }
-                            else if(tmp && mossa_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
+                            else if(tmp && cattura_forzata(b,player)==0 && mossa_legale(tmp->vet[i][j],vett[k],vett[k+1],tmp))
                             {
                                 muovi_legale_wrapper(tmp->vet[i][j],vett[k],vett[k+1],tmp);
                                 int chiamata_ricorsiva = punti_percorso(tmp,altro,rec+1,color_start,x1out,y1out,x2out,y2out);
@@ -98,8 +98,9 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
  */
 int prima_mossa(Board b,int *x1,int *y1,int *x2, int *y2, enum giocatore player)
 {
-    int vett[MOSSETOT] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int flag;
+    int vett[MOSSETOT] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}; //vettore inizializzato con sentinelle
+
     flag = 0;
 
     for (int i = 0; i < 7 && !flag; ++i) {
