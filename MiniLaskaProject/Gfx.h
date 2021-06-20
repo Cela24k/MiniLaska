@@ -82,6 +82,9 @@ void init_raster()
  *
  *      - Restituisce 'r' se la pedina è ROSSA, 'b' se è BLU,
  *        in maiuscolo se è un GENERALE, minuscolo se è un SOLDATO.
+ *
+ *        @param p la pedina da leggere
+ *        @return char contenente la lettera da stampare
  */
 char lettera_pedina(Pedina_list p)
 {
@@ -118,7 +121,7 @@ char lettera_pedina(Pedina_list p)
  *                               0  |     r    |
  *                                  |     b    |
  *                                  +----------+
- *
+ *  @param b la board dalla quale inserire le lettere nel buffer di caratteri
  */
 void raster_con_sprite(Board b)
 {

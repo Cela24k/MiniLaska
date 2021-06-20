@@ -11,6 +11,7 @@ typedef struct board {
  * inizializzata una nuova Pedina_list attraverso la primitiva init_pedina.
  * Il campo viene generato con le pedine rosse e blu nei rispettivi posti e il puntatore
  * delle caselle vuote viene inizializzato a null.
+ * @return una Board nuova in memoria, inizializzata con le pedine nei posti iniziali
  */
 Board init_board()
 {
@@ -37,6 +38,7 @@ Board init_board()
 /*
  * Funzione di utility, inizializza una Board vuota senza le pedine.
  * Utilizzata nella clone_board.
+ * @return una Board nuova, inizializzata senza pedine
  */
 Board init_empty_board()
 {
