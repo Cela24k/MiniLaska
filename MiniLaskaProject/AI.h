@@ -3,7 +3,7 @@
 #define RICORSIONI 4
 #define MOSSETOT 16
 
-/*
+/**
  *  Il metodo punti_percorso, data una scacchiera Board, il colore di un giocatore, il numero della chiamata ricorsiva, il colore di partenza,
  *  e delle variabili per restituire le coordinate finali:
  *
@@ -101,8 +101,8 @@ int punti_percorso(Board b,enum giocatore player, int rec, int color_start,int *
     return maxpunti;
 }
 
-/*
- *  Inserisce nei puntatori ad intero passati in input le coordinate iniziali e finali della prima mossa disponibile di una pedina,
+/**
+ *  Funzione di utilty che inserisce nei puntatori ad intero passati in input le coordinate iniziali e finali della prima mossa disponibile di una pedina,
  *  restituisce 0 se non ha mosse disponibili, 1 altrimenti.
  *
  *  @param b la scacchiera
@@ -139,7 +139,7 @@ int prima_mossa(Board b,int *x1,int *y1,int *x2, int *y2, enum giocatore player)
     return flag;
 }
 
-/*
+/**
  * Data una scacchiera b in input e un giocatore, la funzione ai_move utilizza la ausiliaria punti_percorso per determinare
  * quale percorso generi più punti e salvando le coordinate in delle variabili che saranno usate poi per muovere con la
  * muovi_legale_wrapper.

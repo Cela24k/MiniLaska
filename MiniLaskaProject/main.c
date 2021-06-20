@@ -7,8 +7,9 @@
 #include "AI.h"
 #include "Gfx.h"
 
-/*
+/**
  * Transpone il contenuto della scacchiera 7x7 in una 71*29 più grande e fancy
+ * @param b la board da stampare
  */
 void print_game(Board b)
 {
@@ -16,8 +17,9 @@ void print_game(Board b)
     raster_con_sprite(b);
     printa_raster();
 }
-/*
+/**
  * Restituisce a video le congratulazioni al giocatore che ha vinto
+ * @param b la board di cui stampare le congratulazioni
  */
 void congratulations(Board b)
 {
@@ -29,8 +31,12 @@ void congratulations(Board b)
         printf("\nCongratulazioni giocatore RED! Hai vinto");
 }
 
-/*
+/**
  * Istanzia una partita 1v1 in cui due giocatori possono inserire alternativamente le coordinate in cui muovere
+ * @param b la board della partita
+ * @param player1 il colore del primo player
+ * @param player2 il colore del secondo player
+ * @return 1 se si è conclusa con successo, 0 altrimenti
  */
 int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
 {
@@ -72,9 +78,13 @@ int partita1v1(Board b, enum giocatore player1, enum giocatore player2)
     return winner(b,player1,player2);
 }
 
-/*
+/**
  * Istanzia una partita 1vCPU in cui un giocatore inserisce le coordinate e la CPU muove attraverso
  * l'intelligenza artificiale ai_move
+ * @param b la board della partita
+ * @param player1 il colore del primo player
+ * @param player2 il colore del secondo player
+ * @return 1 se si è conclusa con successo, 0 altrimenti
  */
 int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
@@ -121,7 +131,12 @@ int partita1vCPU(Board b, enum giocatore player1, enum giocatore player2)
     congratulations(b);
     return winner(b,player1,player2);
 }
-
+/**
+ * @param b la board della partita
+ * @param player1 il colore del primo player
+ * @param player2 il colore del secondo player
+ * @return 1 se si è conclusa con successo, 0 altrimenti
+ */
 int partitaCPUvCPU(Board b, enum giocatore player1, enum giocatore player2)
 {
     if(winner(b,player1,player2)==-1)
@@ -134,7 +149,7 @@ int partitaCPUvCPU(Board b, enum giocatore player1, enum giocatore player2)
     return winner(b,player1,player2);
 }
 
-/*
+/**
  * Permette di iniziare una nuova partita, scegliere la modalità e il colore che si vuole.
  */
 int main_menu()
