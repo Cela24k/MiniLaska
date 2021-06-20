@@ -1,21 +1,30 @@
 #ifndef UNTITLED1_PEDINA_H
 #define UNTITLED1_PEDINA_H
-enum stato {PEDINA,GENERALE};
-enum giocatore{BLUE,RED};
+enum stato {PEDINA,GENERALE}; /** stato della pedina, PEDINA può muovere solo in avanti, GENERALE anche indietro e diventa tale dopo che ha raggiunto la fine del campo*/
+enum giocatore{BLUE,RED}; /** colore della pedina */
 
+/**
+ * Pedina_list è la struttura di base che contiene una pedina con stato, colore,
+ * coordinate e un riferimento alla successiva
+ */
 typedef struct pedina
 {
     int coordx;
     int coordy;
-    enum giocatore colore;  /* colore della pedina in testa*/
-    enum stato stato;       /*stato della pedina, GENERALE/NORMALE*/
+    enum giocatore colore;  /** colore della pedina in testa */
+    enum stato stato;       /** stato della pedina, GENERALE/NORMALE */
     struct pedina *next;
 } *Pedina_list;
 
-/*
+/**
  * Inizializza in memoria una pedina con determinate coordinate, un colore e uno stato,
  * dopodichè restituisce il suo riferimento.
  * Se la malloc non va a buon fine, restituisce NULL;
+ * @param colore
+ * @param s
+ * @param x
+ * @param y
+ * @return
  */
 Pedina_list init_pedina(int x, int y, enum giocatore colore,enum stato s)
 {

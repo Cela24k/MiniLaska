@@ -4,7 +4,7 @@
 #define RASTERX 71
 #define RASTERY 29
 
-/*
+/**
  * "raster" è il BUFFER che serve ad immagazzinare la versione "grafica" della scacchiera.
  *
  * - Passo 1 per la stampa della scacchiera
@@ -48,7 +48,7 @@
  */
 char raster[RASTERY][RASTERX];
 
-/*
+/**
  * Inizializza nel buffer di caratteri "raster" la struttura delle celle della scacchiera,
  * ottenendo un pattern 7x7 di rettangoli del tipo:
  *                                      +----------+
@@ -77,7 +77,7 @@ void init_raster()
     }
 }
 
-/*
+/**
  * Funzione di utility che data una pedina, restituisce il carattere da inserire nel buffer.
  *
  *      - Restituisce 'r' se la pedina è ROSSA, 'b' se è BLU,
@@ -103,7 +103,7 @@ char lettera_pedina(Pedina_list p)
     return ' ';
 }
 
-/*
+/**
  * Questa funzione data una Board come parametro, inserisce nel buffer grafico le lettere
  * corrispondenti allo stato delle pedine in quella stessa Board.
  *
@@ -145,7 +145,7 @@ void raster_con_sprite(Board b)
     }
 }
 
-/*
+/**
  * Funzione di utility che stampa il raster che deve essere già stato inizializzato,
  * inoltre lo decora con gli assi e dando un minimo effetto di profondità.
  */
