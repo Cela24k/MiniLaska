@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/AI.h
+
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Board.h
+
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Gfx.h
+
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Pedina.h
+
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/main.c
+stdio.h
+-
+stdlib.h
+-
+time.h
+-
+string.h
+-
+Pedina.h
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Pedina.h
+Board.h
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Board.h
+AI.h
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/AI.h
+Gfx.h
+C:/Users/alece/CLionProjects/Laska_github/MiniLaska/MiniLaskaProject/Gfx.h
+
