@@ -1,7 +1,3 @@
-//
-// Created by alece on 08/02/2021.
-//
-
 #ifndef UNTITLED1_BOARD_H
 #define UNTITLED1_BOARD_H
 #define DIMENSION 7
@@ -87,9 +83,10 @@ Board clone_board(Board b)
 {
     Board tmp;
     tmp = init_empty_board();
+    int i,j;
 
-    for (int i = 0; i < DIMENSION; ++i) {
-        for (int j = 0; j < DIMENSION; ++j) {
+    for (i = 0; i < DIMENSION; ++i) {
+        for (j = 0; j < DIMENSION; ++j) {
             if(b->vet[i][j])
             {
                 Pedina_list p;
@@ -108,7 +105,7 @@ Board clone_board(Board b)
     else return NULL;
 }
 
-// Controlla se due coordinate sono entro i limiti della scacchiera
+/* Controlla se due coordinate sono entro i limiti della scacchiera*/
 int entro_limiti(int x, int y)
 {
     return !(x<0 || x>6 || y<0 || y>6);
@@ -122,7 +119,7 @@ int entro_limiti(int x, int y)
 int muovi(Pedina_list p,int x, int y,Board b)
 {
     if(!p) return 0;
-    if(entro_limiti(x,y)&& !b->vet[x][y]) // se le coordinate finali sono nel campo e se nella destinazione non c'è nessuna pedina
+    if(entro_limiti(x,y)&& !b->vet[x][y]) /*se le coordinate finali sono nel campo e se nella destinazione non c'è nessuna pedina*/
     {
         Pedina_list tmp;
         tmp = b->vet[p->coordx][p->coordy];
@@ -130,10 +127,10 @@ int muovi(Pedina_list p,int x, int y,Board b)
         b->vet[p->coordx][p->coordy] = b->vet[x][y];
         b->vet[x][y] = tmp;
 
-        if (x == 0 || x == 6) // se colpisce il fondo della mappa diventa GENERALE (un SOLDATO può andare solo in avanti)
+        if (x == 0 || x == 6) /* se colpisce il fondo della mappa diventa GENERALE (un SOLDATO può andare solo in avanti)*/
             p->stato = GENERALE;
 
-        //assegno le nuove coordinate allo stack di pedine
+        /*assegno le nuove coordinate allo stack di pedine*/
         p->coordx = x;
         p->coordy = y;
         if(p->next)
@@ -221,7 +218,7 @@ int mangia(Pedina_list p, int x, int y, Board b)
 {
     if(p && b)
     {
-        if(mangia_legale(p,x,y,b)) // se è possibile mangiare legalmente nelle coordinate proposte
+        if(mangia_legale(p,x,y,b)) /* se è possibile mangiare legalmente nelle coordinate proposte*/
         {
             int xmangiato, ymangiato;
 
@@ -244,10 +241,10 @@ int mangia(Pedina_list p, int x, int y, Board b)
  * altrimenti 0 */
 int has_all_pieces(enum giocatore player, Board b)
 {
-    int flg;
+    int flg,i,j;
     flg = 1;
-    for (int i = 0; i < DIMENSION; ++i) {
-        for (int j = 0; j < DIMENSION; ++j) {
+    for (i = 0; i < DIMENSION; ++i) {
+        for (j = 0; j < DIMENSION; ++j) {
             if(b->vet[i][j] && b->vet[i][j]->colore != player)
                 flg = 0;
         }
@@ -271,12 +268,13 @@ int has_moves(Pedina_list p,Board b,int *coords)
 {
     int c;
     int flag;
+    int i;
     flag = 0;
     c = 0;
 
     if(p)
     {
-        for (int i = 1; i < 3; ++i) {
+        for (i = 1; i < 3; ++i) {
             if(entro_limiti(p->coordx+i,p->coordy+i) && (mossa_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)
                || mangia_legale(b->vet[p->coordx][p->coordy],p->coordx+i,p->coordy+i,b)))
             {
@@ -332,7 +330,7 @@ int cattura_forzata(Board b, enum giocatore p1)
             if(b->vet[i][j] && b->vet[i][j]->colore == p1)
             {
                 int vet[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-                if(has_moves(b->vet[i][j],b,vet)) //controllo se c'è una pedina da mangiare, in caso deve farlo!
+                if(has_moves(b->vet[i][j],b,vet)) /*controllo se c'è una pedina da mangiare, in caso deve farlo!*/
                 {
                     for (k = 0; k < 16 && vet[k] != -1; k+=2) {
                         if(mangia_legale(b->vet[i][j],vet[k],vet[k+1],b))
@@ -382,11 +380,11 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
  */
 int player_has_moves(enum giocatore player, Board b)
 {
-    int flag = 0;
+    int flag = 0,i,j;
     int moves[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
-    for (int i = 0; i < DIMENSION; ++i) {
-        for (int j = 0; j < DIMENSION; ++j) {
+    for (i = 0; i < DIMENSION; ++i) {
+        for (j = 0; j < DIMENSION; ++j) {
             if(b->vet[i][j] && b->vet[i][j]->colore == player && has_moves(b->vet[i][j],b,moves))
                 flag = 1;
         }
@@ -394,7 +392,7 @@ int player_has_moves(enum giocatore player, Board b)
     return flag;
 }
 
-//ritorna il colore del vincitore, -1 se non esiste
+/*ritorna il colore del vincitore, -1 se non esiste*/
 enum giocatore winner(Board board,enum giocatore player1,enum giocatore player2)
 {
     if(!player_has_moves(player2,board) || has_all_pieces(player1,board))

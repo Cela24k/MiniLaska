@@ -1,7 +1,3 @@
-//
-// Created by alece on 08/02/2021.
-//
-
 #ifndef UNTITLED1_PEDINA_H
 #define UNTITLED1_PEDINA_H
 enum stato {PEDINA,GENERALE};
@@ -54,7 +50,7 @@ void delete_pedina(Pedina_list *p)
     }
 }
 
-// Utility, data una Pedina_list restituisce quante pedine si susseguono in quel determinato stack.
+/* Utility, data una Pedina_list restituisce quante pedine si susseguono in quel determinato stack.*/
 int contastack(Pedina_list pedina)
 {
     int c;
@@ -70,7 +66,7 @@ int contastack(Pedina_list pedina)
 
     return c;
 }
-// Data una Pedina_list*, rimuove la testa e la libera dalla memoria.
+/* Data una Pedina_list*, rimuove la testa e la libera dalla memoria.*/
 void elimina_testa(Pedina_list *p)
 {
     if(*p)
@@ -82,7 +78,7 @@ void elimina_testa(Pedina_list *p)
     }
 }
 
-// Data una Pedina_list*, rimuove la coda e la libera dalla memoria
+/* Data una Pedina_list*, rimuove la coda e la libera dalla memoria*/
 void elimina_coda(Pedina_list *p)
 {
     Pedina_list tmp;
@@ -99,9 +95,10 @@ void elimina_coda(Pedina_list *p)
         free(tmp);
     }
 }
-// Data una Pedina_list* e l'elemento da inserire,
-// effettua l'append di tale elemento alla lista.
-// restituisce 1 se è andato a buon fine 0 se non va a buon fine.
+/* Data una Pedina_list* e l'elemento da inserire,
+ * effettua l'append di tale elemento alla lista.
+ * restituisce 1 se è andato a buon fine 0 se non va a buon fine.
+ */
 int append(Pedina_list *p,struct pedina p1)
 {
     Pedina_list tmp;
