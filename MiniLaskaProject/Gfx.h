@@ -71,7 +71,11 @@ void init_raster()
                 raster[i][j] = '-';
             else if(j%10 == 0)
                 raster[i][j] = '|';
-            else raster[i][j] = ' ';
+            else {
+                if((i/4 + j/10)%2 != 0)
+                    raster[i][j] = '*';
+                else raster[i][j] = ' ';
+            }
         }
     }
 }

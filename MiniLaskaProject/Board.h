@@ -132,8 +132,21 @@ int muovi(Pedina_list p,int x, int y,Board b)
 
         if (x == 0 || x == 6) // se colpisce il fondo della mappa diventa GENERALE (un SOLDATO può andare solo in avanti)
             p->stato = GENERALE;
+
+        //assegno le nuove coordinate allo stack di pedine
         p->coordx = x;
         p->coordy = y;
+        if(p->next)
+        {
+            p->next->coordx = x;
+            p->next->coordy = y;
+            if(p->next->next)
+            {
+                p->next->next->coordx = x;
+                p->next->next->coordy = y;
+            }
+        }
+
         return 1;
     }
     else return 0;
@@ -370,7 +383,7 @@ int muovi_legale_wrapper(Pedina_list p,int x, int y,Board b)
 int player_has_moves(enum giocatore player, Board b)
 {
     int flag = 0;
-    int moves[8] = {0,0,0,0,0,0,0,0};
+    int moves[16] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 
     for (int i = 0; i < DIMENSION; ++i) {
         for (int j = 0; j < DIMENSION; ++j) {
